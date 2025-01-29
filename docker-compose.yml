@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # FIX: macでは/dev/video0がないため、エラーになる
+    devices:
+      - "/dev/video0:/dev/video0"
     ports:
       - "8000:5000"
     volumes:
