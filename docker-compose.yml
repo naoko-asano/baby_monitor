@@ -2,13 +2,12 @@ name: baby_monitor
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
+    command: flask run --host=0.0.0.0
     # FIX: macでは/dev/video0がないため、エラーになる
-    devices:
-      - "/dev/video0:/dev/video0"
     ports:
       - "8000:5000"
+    devices:
+      - "/dev/video0:/dev/video0"
     volumes:
       - .:/app
