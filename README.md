@@ -17,5 +17,5 @@ docker compose up
 
 ```sh
 docker compose build
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+docker compose -f compose.yaml -f compose.prod.yaml up
 ```
