@@ -4,9 +4,9 @@ services:
   web:
     build: .
     command: flask run --host=0.0.0.0
-    # FIX: macでは/dev/video0がないため、エラーになる
     ports:
       - "8000:5000"
+    # FIX: macでは/dev/video0がないため、エラーになる
     devices:
       - "/dev/video0:/dev/video0"
     volumes:
