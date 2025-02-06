@@ -1,11 +1,17 @@
 from flask import Flask, Response, render_template
 import cv2
+import board
+import busio
+import adafruit_sht31d
 
 app = Flask(__name__)
 
 FPS = 30
 WIDTH = 640
 HEIGHT = 480
+
+i2c = busio.I2C(board.SCL, board.SDA)
+sensor = adafruit_sht31d.SHT31D(i2c)
 
 def init_camera():
     cap = cv2.VideoCapture('/dev/video0')
@@ -31,7 +37,13 @@ def generate_frames():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        temperature = round(sensor.temperature, 1)
+        humidity = round(sensor.relative_humidity, 1)
+    except Exception:
+        temperature = '???'
+        humidity = '???'
+    return render_template('index.html', temperature = temperature, humidity = humidity)
 
 @app.route('/video_feed')
 def video_feed():

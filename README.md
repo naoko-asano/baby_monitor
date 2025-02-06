@@ -2,20 +2,19 @@
 
 ## 概要
 
-- 赤ちゃん監視モニターです。Raspberry Pi での使用を想定しています。
+- Raspberry Pi で動作する赤ちゃん監視モニターシステムです。
+- カメラからのライブストリーミング映像、温度および湿度を表示します。
+
+## 準備
+
+```
+python3 -m venv venv
+. venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## 起動方法
 
-### 開発環境
-
 ```sh
-docker compose build
-docker compose up
-```
-
-### 本番環境
-
-```sh
-docker compose build
-docker compose -f compose.yaml -f compose.prod.yaml up
+gunicorn -w 4 -k gevent -b 0.0.0.0:5000 "app:app"
 ```

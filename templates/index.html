@@ -8,8 +8,8 @@
   <body>
     <div class="main">
       <h1>Baby Monitoring</h1>
-      <p>Temperature:</p>
-      <p>Humidity:</p>
+      <p>Temperature: {{ temperature }}°C</p>
+      <p>Humidity: {{ humidity }}%</p>
       <p>Baby:</p>
       <img src="{{ url_for('video_feed') }}" alt="Video Feed" />
     </div>

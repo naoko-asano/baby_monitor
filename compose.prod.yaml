@@ -1,6 +1,0 @@
-services:
-  web:
-    command: gunicorn -w 4 -k gevent -b 0.0.0.0:5000 "app:app"
-    ports:
-      - "80:5000"
-    restart: unless-stopped
