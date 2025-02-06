@@ -43,7 +43,7 @@ def index():
     except Exception:
         temperature = '???'
         humidity = '???'
-    return render_template('index.html', temperature=temperature, humidity=humidity)
+    return render_template('index.html', temperature = temperature, humidity = humidity)
 
 @app.route('/video_feed')
 def video_feed():
