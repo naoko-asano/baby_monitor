@@ -38,8 +38,8 @@ def generate_frames():
 @app.route('/')
 def index():
     try:
-        temperature = round(sensor.temperature, 2)
-        humidity = round(sensor.relative_humidity, 2)
+        temperature = round(sensor.temperature, 1)
+        humidity = round(sensor.relative_humidity, 1)
     except Exception:
         temperature = '???'
         humidity = '???'
