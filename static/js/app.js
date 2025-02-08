@@ -10,5 +10,5 @@ function fetchRoomConditions() {
 
 document.addEventListener("DOMContentLoaded", function () {
   fetchRoomConditions();
-  setInterval(fetchRoomConditions, 1000 * 60 * 3); // 3分ごと
+  setInterval(fetchRoomConditions, 1000 * 60);
 });
