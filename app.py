@@ -1,4 +1,4 @@
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, jsonify
 import cv2
 import board
 import busio
@@ -37,17 +37,21 @@ def generate_frames():
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/room_conditions')
+def room_conditions():
     try:
         temperature = round(sensor.temperature, 1)
         humidity = round(sensor.relative_humidity, 1)
     except Exception:
         temperature = '???'
         humidity = '???'
-    return render_template('index.html', temperature = temperature, humidity = humidity)
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return jsonify({ 'temperature': temperature, 'humidity': humidity })
 
 if __name__ == "__main__":
     app.run()
