@@ -16,5 +16,6 @@ pip install -r requirements.txt
 ## 起動方法
 
 ```sh
+. venv/bin/activate # 必要に応じて実行
 gunicorn -w 4 -k gevent -b 0.0.0.0:5000 "app:app"
 ```
