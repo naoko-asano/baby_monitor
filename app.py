@@ -13,18 +13,18 @@ app = Flask(__name__)
 def stream_video():
     command = [
         'ffmpeg',
-        '-f', 'v4l2'
-        '-i', '/dev/video0'
-        '-f', 'alsa'
-        '-i', 'hw:2,0'
-        '-c:v', 'libx264'
+        '-f', 'v4l2',
+        '-i', '/dev/video0',
+        '-f', 'alsa',
+        '-i', 'hw:2,0',
+        '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
         '-preset', 'veryfast',
-        '-s', '640x480'
-        '-c:a', 'aac'
-        '-b:a', '128k'
-        '-ar', '44100'
-        '-f', 'mpegts'
+        '-s', '640x480',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-ar', '44100',
+        '-f', 'mpegts',
         '-'
     ]
     ffmpeg = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=10**8)
