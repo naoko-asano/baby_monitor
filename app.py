@@ -6,52 +6,52 @@ import adafruit_sht31d
 
 app = Flask(__name__)
 
-FPS = 30
-WIDTH = 640
-HEIGHT = 480
+# i2c = busio.I2C(board.SCL, board.SDA)
+# sensor = adafruit_sht31d.SHT31D(i2c)
 
-i2c = busio.I2C(board.SCL, board.SDA)
-sensor = adafruit_sht31d.SHT31D(i2c)
+def stream_video():
+    command = [
+        'ffmpeg',
+        '-f', 'v4l2'
+        '-i', '/dev/video0'
+        '-f', 'alsa'
+        '-i', 'hw:2,0'
+        '-c:v', 'libx264'
+        '-pix_fmt', 'yuv420p',
+        '-preset', 'veryfast',
+        '-s', '640x480'
+        '-c:a', 'aac'
+        '-b:a', '128k'
+        '-ar', '44100'
+        '-f', 'mpegts'
+        '-'
+    ]
+    ffmpeg = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=10**8)
+    while True:
+        data = ffmpeg.stdout.read(1024)
+        if not data:
+            break
+        yield data
 
-def init_camera():
-    cap = cv2.VideoCapture('/dev/video0')
-    cap.set(cv2.CAP_PROP_FPS, FPS)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)
-    return cap
-
-def generate_frames():
-    cap = init_camera()
-    try:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                yield b'--frame\r\nContent-Type: text/plain\r\n\r\nError capturing frame.\r\n'
-                break
-            else:
-                ret, buffer = cv2.imencode('.jpg', frame)
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-    finally:
-        cap.release()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(stream_video(), mimetype='video/mp2t')
 
-@app.route('/room_conditions')
-def room_conditions():
-    try:
-        temperature = round(sensor.temperature, 1)
-        humidity = round(sensor.relative_humidity, 1)
-    except Exception:
-        temperature = '???'
-        humidity = '???'
-    return jsonify({ 'temperature': temperature, 'humidity': humidity })
+# @app.route('/room_conditions')
+# def room_conditions():
+#     try:
+#         temperature = round(sensor.temperature, 1)
+#         humidity = round(sensor.relative_humidity, 1)
+#     except Exception:
+#         temperature = '???'
+#         humidity = '???'
+#     return jsonify({ 'temperature': temperature, 'humidity': humidity })
 
 if __name__ == "__main__":
     app.run()

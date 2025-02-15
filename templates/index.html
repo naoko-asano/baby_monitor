@@ -12,11 +12,13 @@
   <body>
     <div class="main">
       <h1>Baby Monitoring</h1>
-      <p>Temperature: <span id="temperature">{{ temperature }}</span>°C</p>
-      <p>Humidity: <span id="humidity">{{ humidity }}</span>%</p>
+      <!-- <p>Temperature: <span id="temperature">{{ temperature }}</span>°C</p>
+      <p>Humidity: <span id="humidity">{{ humidity }}</span>%</p> -->
       <p>Baby:</p>
-      <img src="{{ url_for('video_feed') }}" alt="Video Feed" />
+      <video width="640" height="480" controls autoplay>
+        <source src="/video_feed" type="video/mp2t" />
+      </video>
     </div>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
   </body>
 </html>
