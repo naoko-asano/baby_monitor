@@ -3,6 +3,7 @@ import cv2
 import board
 import busio
 import adafruit_sht31d
+import subprocess
 
 app = Flask(__name__)
 
