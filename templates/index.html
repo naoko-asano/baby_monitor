@@ -16,9 +16,10 @@
       <p>Humidity: <span id="humidity">{{ humidity }}</span>%</p> -->
       <p>Baby:</p>
       <video width="640" height="480" controls autoplay>
-        <source src="/video_feed" type="video/mp2t" />
+        <source src="/stream.m3u8" type="application/x-mpegURL" />
       </video>
     </div>
-    <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
   </body>
 </html>

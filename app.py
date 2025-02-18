@@ -10,7 +10,7 @@ app = Flask(__name__)
 # i2c = busio.I2C(board.SCL, board.SDA)
 # sensor = adafruit_sht31d.SHT31D(i2c)
 
-def stream_video():
+def stream_video_audio():
     command = [
         'ffmpeg',
         '-f', 'v4l2',
@@ -24,25 +24,28 @@ def stream_video():
         '-c:a', 'aac',
         '-b:a', '128k',
         '-ar', '44100',
-        '-f', 'mpegts',
+        '-hls_time', '2',  # セグメントの長さを短く設定
+        '-hls_list_size', '5',  # プレイリストの保持するセグメント数を限定
+        '-hls_flags', 'delete_segments+append_list',  # 古いセグメントを削除し、プレイリストを更新
+        '-f', 'hls',
         '-'
     ]
-    ffmpeg = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=10**8)
-    while True:
-        data = ffmpeg.stdout.read(1024)
-        if not data:
-            break
-        yield data
-
+    return subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(stream_video(), mimetype='video/mp2t')
+@app.route('/stream.m3u8')
+def stream():
+    process = stream_video_audio()
+    def generate():
+        while True:
+            chunk = process.stdout.read(1024)
+            if not chunk:
+                break
+            yield chunk
+    return Response(generate(), mimetype='application/vnd.apple.mpegurl')
 
 # @app.route('/room_conditions')
 # def room_conditions():
