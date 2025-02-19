@@ -16,7 +16,7 @@ def stream_video_audio():
         '-f', 'v4l2',
         '-i', '/dev/video0',
         '-f', 'alsa',
-        '-ac', 1,
+        '-ac', '1',
         '-i', 'hw:2,0',
         '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
