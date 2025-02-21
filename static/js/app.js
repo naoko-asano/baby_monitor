@@ -9,6 +9,6 @@ function fetchRoomConditions() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  fetchRoomConditions();
-  setInterval(fetchRoomConditions, 1000 * 60);
+  // fetchRoomConditions();
+  // setInterval(fetchRoomConditions, 1000 * 60);
 });
