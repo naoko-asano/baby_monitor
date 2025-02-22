@@ -6,14 +6,27 @@ import atexit
 # import busio
 # import adafruit_sht31d
 
-app = Flask(__name__)
-
 FPS = 30
 WIDTH = 640
 HEIGHT = 480
 
 # i2c = busio.I2C(board.SCL, board.SDA)
 # sensor = adafruit_sht31d.SHT31D(i2c)
+
+def create_app():
+    app = Flask(__name__)
+
+    start_live_stream()
+
+    @app.route('/')
+    def index():
+        return render_template('index.html')
+
+    @app.route('/stream/<path:filename>')
+    def serve_hls_file(filename):
+        return send_from_directory('stream', filename)
+
+    return app
 
 def start_live_stream():
     command = [
@@ -34,6 +47,8 @@ def start_live_stream():
         '-f', 'hls',
         '-hls_time', '4',
         '-hls_playlist_type', 'event',
+        '-hls_list_size', '5',
+        '-hls_flags', 'delete_segments+append_list',
         'stream/index.m3u8'
     ]
     try:
@@ -43,14 +58,6 @@ def start_live_stream():
         print("Failed to start FFmpeg:", e)
 
     atexit.register(lambda: process.terminate() if process and process.poll() is None else None)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/stream/<path:filename>')
-def serve_hls_file()
-    return send_from_directory('stream', filename)
 
 # @app.route('/room_conditions')
 # def room_conditions():
@@ -62,6 +69,7 @@ def serve_hls_file()
 #         humidity = '???'
 #     return jsonify({ 'temperature': temperature, 'humidity': humidity })
 
+app = create_app()
+
 if __name__ == "__main__":
-    start_live_stream()
-    app.run()
+    app.run(debug=True)
