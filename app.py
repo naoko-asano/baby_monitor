@@ -26,6 +26,16 @@ def create_app():
     def serve_hls_file(filename):
         return send_from_directory('stream', filename)
 
+    @app.route('/room_conditions')
+    def room_conditions():
+        try:
+            temperature = round(sensor.temperature, 1)
+            humidity = round(sensor.relative_humidity, 1)
+        except Exception:
+            temperature = '???'
+            humidity = '???'
+        return jsonify({ 'temperature': temperature, 'humidity': humidity })
+
     return app
 
 def start_live_stream():
@@ -58,16 +68,6 @@ def start_live_stream():
         print("Failed to start FFmpeg:", e)
 
     atexit.register(lambda: process.terminate() if process and process.poll() is None else None)
-
-@app.route('/room_conditions')
-def room_conditions():
-    try:
-        temperature = round(sensor.temperature, 1)
-        humidity = round(sensor.relative_humidity, 1)
-    except Exception:
-        temperature = '???'
-        humidity = '???'
-    return jsonify({ 'temperature': temperature, 'humidity': humidity })
 
 app = create_app()
 
