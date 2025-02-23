@@ -1,1 +1,4 @@
 **/__pycache__/
+
+stream/**
+!stream/.gitkeep
