@@ -15,9 +15,7 @@
       <!-- <p>Temperature: <span id="temperature">{{ temperature }}</span>°C</p>
       <p>Humidity: <span id="humidity">{{ humidity }}</span>%</p> -->
       <p>Baby:</p>
-      <video controls id="video">
-        <source src="/stream/index.m3u8" type="application/x-mpegURL" />
-      </video>
+      <video controls id="video" src="/stream/index.m3u8"></video>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
