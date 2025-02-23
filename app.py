@@ -2,16 +2,16 @@ from flask import Flask, Response, render_template, jsonify, send_from_directory
 import cv2
 import subprocess
 import atexit
-# import board
-# import busio
-# import adafruit_sht31d
+import board
+import busio
+import adafruit_sht31d
 
 FPS = 30
 WIDTH = 640
 HEIGHT = 480
 
-# i2c = busio.I2C(board.SCL, board.SDA)
-# sensor = adafruit_sht31d.SHT31D(i2c)
+i2c = busio.I2C(board.SCL, board.SDA)
+sensor = adafruit_sht31d.SHT31D(i2c)
 
 def create_app():
     app = Flask(__name__)
@@ -59,15 +59,15 @@ def start_live_stream():
 
     atexit.register(lambda: process.terminate() if process and process.poll() is None else None)
 
-# @app.route('/room_conditions')
-# def room_conditions():
-#     try:
-#         temperature = round(sensor.temperature, 1)
-#         humidity = round(sensor.relative_humidity, 1)
-#     except Exception:
-#         temperature = '???'
-#         humidity = '???'
-#     return jsonify({ 'temperature': temperature, 'humidity': humidity })
+@app.route('/room_conditions')
+def room_conditions():
+    try:
+        temperature = round(sensor.temperature, 1)
+        humidity = round(sensor.relative_humidity, 1)
+    except Exception:
+        temperature = '???'
+        humidity = '???'
+    return jsonify({ 'temperature': temperature, 'humidity': humidity })
 
 app = create_app()
 

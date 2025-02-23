@@ -9,7 +9,8 @@ function fetchRoomConditions() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // fetchRoomConditions();
+  fetchRoomConditions();
+  setInterval(fetchRoomConditions, 1000 * 60);
   const video = document.getElementById("video");
   if (Hls.isSupported()) {
     const hls = new Hls();
@@ -19,5 +20,4 @@ document.addEventListener("DOMContentLoaded", function () {
       video.play();
     });
   }
-  // setInterval(fetchRoomConditions, 1000 * 60);
 });
