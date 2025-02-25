@@ -39,7 +39,7 @@ After=network.target
 User=your_username
 WorkingDirectory=/home/your_username/baby_monitor
 Environment="PATH=/home/your_username/baby_monitor/venv/bin"
-ExecStart=/home/your_username/baby_monitor/venv/bin/gunicorn -w 4 -k gevent -b 0.0.0.0:5000 "app:app"
+ExecStart=/home/your_username/baby_monitor/venv/bin/gunicorn -k gevent -b 0.0.0.0:5000 "app:app"
 
 [Install]
 WantedBy=multi-user.target
