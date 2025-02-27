@@ -1,5 +1,4 @@
 from flask import Flask, Response, render_template, jsonify, send_from_directory
-import cv2
 import subprocess
 import atexit
 import board
