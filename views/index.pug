@@ -1,5 +1,11 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .main
+    h1 Baby Monitoring
+    p Temperature: 
+      span#temperature 20°
+    p Humidity: 
+      span#humidity 60%
+    p Baby: 
+    video#video(autoplay, controls)
