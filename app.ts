@@ -1,12 +1,17 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+import createError from "http-errors";
+import express, { Request, Response, NextFunction } from "express";
+import path from "path";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
+import indexRouter from "./routes/index";
 
-var indexRouter = require("./routes/index");
+type Error = {
+  status?: number;
+  message: string;
+};
 
-var app = express();
+const app = express();
+const __dirname = path.resolve();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -26,7 +31,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
@@ -36,4 +41,4 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-module.exports = app;
+export default app;
