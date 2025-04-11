@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "22.14.0"
+  },
+  "packageManager": "pnpm@10.8.0",
   "scripts": {
     "start": "tsx ./bin/www.ts",
     "lint": "eslint . && stylelint '**/*.css'",
