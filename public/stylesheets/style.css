@@ -16,3 +16,10 @@ a {
 .main {
   text-align: center;
 }
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  width: 300px;
+  margin: 10px auto 0;
+}

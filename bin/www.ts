@@ -7,6 +7,7 @@
 import app from "../app";
 import debug from "debug";
 import http from "http";
+import { Server } from "socket.io";
 /**
  * Get port from environment and store in Express.
  */
@@ -86,3 +87,21 @@ function onListening() {
   const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
 }
+
+/**
+ * Socket.IO setup
+ */
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("message", (message) => {
+    console.log("Message received: ", message);
+    socket.send("Hello from the server!");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("a user disconnected");
+  });
+});
