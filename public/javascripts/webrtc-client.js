@@ -1,5 +1,8 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 
+const startButton = document.getElementById("startButton");
+const stopButton = document.getElementById("stopButton");
+
 const socket = io({
   autoConnect: false,
 });
@@ -21,24 +24,30 @@ socket.on("connect_error", (error) => {
 });
 
 function init() {
-  const startButton = document.getElementById("startButton");
-  const stopButton = document.getElementById("stopButton");
   stopButton.disabled = true;
 
   startButton.addEventListener("click", () => {
-    startButton.disabled = true;
-    stopButton.disabled = false;
-
-    socket.connect();
-    socket.send("Hello from the client!");
+    handleStartButtonClick();
   });
 
   stopButton.addEventListener("click", () => {
-    startButton.disabled = false;
-    stopButton.disabled = true;
-
-    socket.disconnect();
+    handleStopButtonClick();
   });
+}
+
+function handleStartButtonClick() {
+  startButton.disabled = true;
+  stopButton.disabled = false;
+
+  socket.connect();
+  socket.send("Hello from the client!");
+}
+
+function handleStopButtonClick() {
+  startButton.disabled = false;
+  stopButton.disabled = true;
+
+  socket.disconnect();
 }
 
 init();
