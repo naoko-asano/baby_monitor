@@ -23,3 +23,8 @@ a {
   width: 300px;
   margin: 10px auto 0;
 }
+
+#video {
+  width: 680px;
+  height: 480px;
+}

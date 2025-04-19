@@ -1,6 +1,6 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 
-const videoElement = document.getElementById("videoElement");
+const videoElement = document.getElementById("video");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
 stopButton.disabled = true;
@@ -30,11 +30,11 @@ socket.on("connect_error", (error) => {
 });
 
 socket.on("answer", (answer) => {
-  receiveAnswer(answer);
+  handleReceiveAnswer(answer);
 });
 
 socket.on("iceCandidate", (iceCandidate) => {
-  receiveIceCandidate(iceCandidate);
+  handleReceiveRemoteCandidate(iceCandidate);
 });
 
 let peerConnection = new RTCPeerConnection({
@@ -51,16 +51,16 @@ peerConnection.ontrack = (event) => {
 
 peerConnection.onicecandidate = (event) => {
   if (event.candidate) {
-    socket.emit("iceCandidate", event.candidate);
+    sendIceCandidate(event.candidate);
   }
 };
 
-async function handleStartButtonClick() {
+function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
 
   socket.connect();
-  await sendOffer();
+  sendOffer();
 }
 
 function handleStopButtonClick() {
@@ -71,18 +71,26 @@ function handleStopButtonClick() {
 }
 
 async function sendOffer() {
+  peerConnection.addTransceiver("video", { direction: "recvonly" });
+  peerConnection.addTransceiver("audio", { direction: "recvonly" });
+
   const offer = await peerConnection.createOffer();
-  peerConnection.setLocalDescription(offer);
-  console.log("Sending offer: ", offer);
+  await peerConnection.setLocalDescription(offer);
   socket.emit("offer", offer);
+  console.log("Sent offer: ", offer);
 }
 
-async function receiveAnswer(answer) {
+async function handleReceiveAnswer(answer) {
   console.log("Received answer: ", answer);
   await peerConnection.setRemoteDescription(answer);
 }
 
-async function receiveIceCandidate(iceCandidate) {
+async function handleReceiveRemoteCandidate(iceCandidate) {
   console.log("Received ICE candidate: ", iceCandidate);
   await peerConnection.addIceCandidate(iceCandidate);
+}
+
+function sendIceCandidate(iceCandidate) {
+  socket.emit("iceCandidate", iceCandidate);
+  console.log("Sent ICE candidate: ", iceCandidate);
 }
