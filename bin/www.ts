@@ -94,12 +94,7 @@ function onListening() {
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
-
-  socket.on("message", (message) => {
-    console.log("Message received: ", message);
-    socket.send("Hello from the server!");
-  });
+  console.log("connected");
 
   socket.on("offer", (offer) => {
     console.log("Offer received: ", offer);
@@ -117,6 +112,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("a user disconnected");
+    console.log("disconnected");
   });
 });
