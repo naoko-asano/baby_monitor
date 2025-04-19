@@ -111,7 +111,9 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("iceCandidate", iceCandidate);
   });
 
-  socket.on("disconnect", () => {
-    console.log("disconnected");
+  socket.on("close", () => {
+    socket.broadcast.emit("close");
+    socket.disconnect();
+    console.log("close");
   });
 });

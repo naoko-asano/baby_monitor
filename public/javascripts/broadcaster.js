@@ -10,6 +10,20 @@ socket.on("iceCandidate", (iceCandidate) => {
   handleReceiveRemoteCandidate(iceCandidate);
 });
 
+socket.on("close", () => {
+  if (!peerConnection) return;
+  peerConnection.close();
+  peerConnection = null;
+
+  if (!stream) return;
+  stream.getTracks().forEach((track) => {
+    track.stop();
+  });
+  stream = null;
+
+  console.log("Peer connection closed");
+});
+
 let peerConnection = new RTCPeerConnection({
   iceServers: [
     {
@@ -17,9 +31,10 @@ let peerConnection = new RTCPeerConnection({
     },
   ],
 });
+let stream;
 
 try {
-  const stream = await navigator.mediaDevices.getUserMedia({
+  stream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true,
   });

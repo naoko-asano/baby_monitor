@@ -66,8 +66,7 @@ function handleStartButtonClick() {
 function handleStopButtonClick() {
   startButton.disabled = false;
   stopButton.disabled = true;
-
-  socket.disconnect();
+  stopWebRTC();
 }
 
 async function sendOffer() {
@@ -93,4 +92,14 @@ async function handleReceiveRemoteCandidate(iceCandidate) {
 function sendIceCandidate(iceCandidate) {
   socket.emit("iceCandidate", iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
+}
+
+function stopWebRTC() {
+  if (!peerConnection) return;
+
+  peerConnection.close();
+  peerConnection = null;
+  videoElement.srcObject = null;
+  socket.emit("close");
+  console.log("Peer connection closed");
 }
