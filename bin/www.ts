@@ -94,14 +94,24 @@ function onListening() {
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("connected");
 
-  socket.on("message", (message) => {
-    console.log("Message received: ", message);
-    socket.send("Hello from the server!");
+  socket.on("offer", (offer) => {
+    console.log("Offer received: ", offer);
+    socket.broadcast.emit("offer", offer);
+  });
+
+  socket.on("answer", (answer) => {
+    console.log("Answer received: ", answer);
+    socket.broadcast.emit("answer", answer);
+  });
+
+  socket.on("iceCandidate", (iceCandidate) => {
+    console.log("IceCandidate received: ", iceCandidate);
+    socket.broadcast.emit("iceCandidate", iceCandidate);
   });
 
   socket.on("disconnect", () => {
-    console.log("a user disconnected");
+    console.log("disconnected");
   });
 });
