@@ -94,7 +94,17 @@ function onListening() {
 const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.log("connected");
+  console.log("Websocket connected");
+
+  socket.on("requestToStartSignaling", () => {
+    console.log("Received a request to start signaling");
+    socket.broadcast.emit("requestToStartSignaling");
+  });
+
+  socket.on("signalingReady", () => {
+    console.log("A peer is ready to start signaling");
+    socket.broadcast.emit("signalingReady");
+  });
 
   socket.on("offer", (offer) => {
     console.log("Offer received: ", offer);
@@ -114,6 +124,6 @@ io.on("connection", (socket) => {
   socket.on("close", () => {
     socket.broadcast.emit("close");
     socket.disconnect();
-    console.log("close");
+    console.log("Websocket disconnected");
   });
 });

@@ -4,6 +4,7 @@ const videoElement = document.getElementById("video");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
 stopButton.disabled = true;
+let peerConnection;
 
 startButton.addEventListener("click", () => {
   handleStartButtonClick();
@@ -29,6 +30,10 @@ socket.on("connect_error", (error) => {
   console.log("Connection error: ", error);
 });
 
+socket.on("signalingReady", () => {
+  sendOffer();
+});
+
 socket.on("answer", (answer) => {
   handleReceiveAnswer(answer);
 });
@@ -37,30 +42,12 @@ socket.on("iceCandidate", (iceCandidate) => {
   handleReceiveRemoteCandidate(iceCandidate);
 });
 
-let peerConnection = new RTCPeerConnection({
-  iceServers: [
-    {
-      urls: "stun:stun.l.google.com:19302",
-    },
-  ],
-});
-
-peerConnection.ontrack = (event) => {
-  videoElement.srcObject = event.streams[0];
-};
-
-peerConnection.onicecandidate = (event) => {
-  if (event.candidate) {
-    sendIceCandidate(event.candidate);
-  }
-};
-
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
 
-  socket.connect();
-  sendOffer();
+  initPeerConnection();
+  requestToStartSignaling();
 }
 
 function handleStopButtonClick() {
@@ -69,7 +56,39 @@ function handleStopButtonClick() {
   stopWebRTC();
 }
 
+function requestToStartSignaling() {
+  socket.connect();
+  socket.emit("requestToStartSignaling");
+  console.log("Requested to start signaling");
+}
+
+function initPeerConnection() {
+  if (peerConnection) return;
+
+  peerConnection = new RTCPeerConnection({
+    iceServers: [
+      {
+        urls: "stun:stun.l.google.com:19302",
+      },
+    ],
+  });
+
+  peerConnection.ontrack = (event) => {
+    videoElement.srcObject = event.streams[0];
+  };
+
+  peerConnection.onicecandidate = (event) => {
+    if (event.candidate) {
+      sendIceCandidate(event.candidate);
+    }
+  };
+}
+
 async function sendOffer() {
+  if (!peerConnection) {
+    throw new Error("Peer connection not initialized");
+  }
+
   peerConnection.addTransceiver("video", { direction: "recvonly" });
   peerConnection.addTransceiver("audio", { direction: "recvonly" });
 
@@ -80,6 +99,9 @@ async function sendOffer() {
 }
 
 async function handleReceiveAnswer(answer) {
+  if (!peerConnection) {
+    throw new Error("Peer connection not initialized");
+  }
   console.log("Received answer: ", answer);
   await peerConnection.setRemoteDescription(answer);
 }
