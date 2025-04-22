@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Baby Monitor</title>
+    <title><%= title %></title>
     <link rel="stylesheet" href="/stylesheets/style.css" />
+    <% if (page === 'viewer') { %>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.2/spin.min.css" integrity="sha512-ssYEuK9Epo/48VIlBWTFosf1izrgGZqEMELJP+L7Clh0nvaOSTg87dM+Z8L+KKjrPdMbMvKYOOnzBOkNMhWFsg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <% } %>
   </head>
   <body>
     <%- body %>

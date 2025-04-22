@@ -1,9 +1,34 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+import { Spinner } from "https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.2/spin.min.js";
 
 const videoElement = document.getElementById("video");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
 stopButton.disabled = true;
+
+const spinnerOptions = {
+  lines: 12, // The number of lines to draw
+  length: 42, // The length of each line
+  width: 18, // The line thickness
+  radius: 46, // The radius of the inner circle
+  scale: 0.15, // Scales overall size of the spinner
+  corners: 1, // Corner roundness (0..1)
+  speed: 1, // Rounds per second
+  rotate: 0, // The rotation offset
+  animation: "spinner-line-fade-default", // The CSS animation name for the lines
+  direction: 1, // 1: clockwise, -1: counterclockwise
+  color: "#ffffff", // CSS color or array of colors
+  fadeColor: "transparent", // CSS color or array of colors
+  top: "50%", // Top position relative to parent
+  left: "50%", // Left position relative to parent
+  shadow: "0 0 1px transparent", // Box-shadow for the lines
+  zIndex: 2000000000, // The z-index (defaults to 2e9)
+  className: "spinner", // The CSS class to assign to the spinner
+  position: "absolute", // Element positioning
+};
+const spinner = new Spinner(spinnerOptions);
+const videoWrapperElement = document.getElementById("videoWrapper");
+
 let peerConnection;
 
 startButton.addEventListener("click", () => {
@@ -45,6 +70,7 @@ socket.on("iceCandidate", (iceCandidate) => {
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
+  startLoading(videoWrapperElement);
 
   initPeerConnection();
   requestToStartSignaling();
@@ -74,6 +100,7 @@ function initPeerConnection() {
   });
 
   peerConnection.ontrack = (event) => {
+    stopLoading();
     videoElement.srcObject = event.streams[0];
   };
 
@@ -126,4 +153,12 @@ function stopWebRTC() {
 function ensurePeerConnectionInitialized() {
   if (peerConnection) return;
   throw new Error("Peer connection is not initialized");
+}
+
+function startLoading(element) {
+  spinner.spin(element);
+}
+
+function stopLoading() {
+  spinner.stop();
 }
