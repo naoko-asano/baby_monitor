@@ -85,9 +85,7 @@ function initPeerConnection() {
 }
 
 async function sendOffer() {
-  if (!peerConnection) {
-    throw new Error("Peer connection not initialized");
-  }
+  ensurePeerConnectionInitialized();
 
   peerConnection.addTransceiver("video", { direction: "recvonly" });
   peerConnection.addTransceiver("audio", { direction: "recvonly" });
@@ -99,9 +97,8 @@ async function sendOffer() {
 }
 
 async function handleReceiveAnswer(answer) {
-  if (!peerConnection) {
-    throw new Error("Peer connection not initialized");
-  }
+  ensurePeerConnectionInitialized();
+
   console.log("Received answer: ", answer);
   await peerConnection.setRemoteDescription(answer);
 }
@@ -124,4 +121,9 @@ function stopWebRTC() {
   videoElement.srcObject = null;
   socket.emit("close");
   console.log("Peer connection closed");
+}
+
+function ensurePeerConnectionInitialized() {
+  if (peerConnection) return;
+  throw new Error("Peer connection is not initialized");
 }

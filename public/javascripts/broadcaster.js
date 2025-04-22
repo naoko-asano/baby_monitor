@@ -70,9 +70,7 @@ function notifySignalingReady() {
 }
 
 async function handleReceiveOffer(offer) {
-  if (!peerConnection) {
-    throw new Error("Peer connection not initialized");
-  }
+  ensurePeerConnectionInitialized();
 
   console.log("Received offer: ", offer);
   await peerConnection.setRemoteDescription(offer);
@@ -84,9 +82,7 @@ async function handleReceiveOffer(offer) {
 }
 
 async function handleReceiveRemoteCandidate(iceCandidate) {
-  if (!peerConnection) {
-    throw new Error("Peer connection not initialized");
-  }
+  ensurePeerConnectionInitialized();
 
   console.log("Received ICE candidate: ", iceCandidate);
   await peerConnection.addIceCandidate(iceCandidate);
@@ -95,4 +91,9 @@ async function handleReceiveRemoteCandidate(iceCandidate) {
 function sendIceCandidate(iceCandidate) {
   socket.emit("iceCandidate", iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
+}
+
+function ensurePeerConnectionInitialized() {
+  if (peerConnection) return;
+  throw new Error("Peer connection is not initialized");
 }
