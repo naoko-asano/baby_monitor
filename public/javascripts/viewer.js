@@ -1,6 +1,34 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 import { Spinner } from "https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.2/spin.min.js";
 
+const temperatureElement = document.getElementById("temperature");
+const humidityElement = document.getElementById("humidity");
+async function fetchRoomConditions() {
+  try {
+    const response = await fetch("http://raspberrypi.local:5000", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const { temperature, humidity } = await response.json();
+    temperatureElement.textContent = temperature;
+    humidityElement.textContent = humidity;
+  } catch (error) {
+    console.error("Error fetching room conditions:", error);
+    temperatureElement.textContent = "N/A";
+    humidityElement.textContent = "N/A";
+  }
+}
+
+fetchRoomConditions();
+setInterval(fetchRoomConditions, 1000 * 60);
+
+let peerConnection;
+
 const videoElement = document.getElementById("video");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
@@ -28,8 +56,6 @@ const spinnerOptions = {
 };
 const spinner = new Spinner(spinnerOptions);
 const videoWrapperElement = document.getElementById("videoWrapper");
-
-let peerConnection;
 
 startButton.addEventListener("click", () => {
   handleStartButtonClick();
