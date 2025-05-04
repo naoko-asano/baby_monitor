@@ -5,7 +5,7 @@ const temperatureElement = document.getElementById("temperature");
 const humidityElement = document.getElementById("humidity");
 async function fetchRoomConditions() {
   try {
-    const response = await fetch("http://raspberrypi.local:5000", {
+    const response = await fetch("https://room_conditions.pkoroom.com", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
