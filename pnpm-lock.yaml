@@ -19,6 +19,9 @@ importers:
       express:
         specifier: 5.1.0
         version: 5.1.0
+      express-basic-auth:
+        specifier: ^1.2.1
+        version: 1.2.1
       express-ejs-layouts:
         specifier: ^2.5.1
         version: 2.5.1
@@ -56,6 +59,9 @@ importers:
       "@types/node":
         specifier: ^22.14.0
         version: 22.14.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
       eslint:
         specifier: ^9.24.0
         version: 9.24.0
@@ -1055,6 +1061,13 @@ packages:
       }
     engines: { node: ">=8" }
 
+  dotenv@16.5.0:
+    resolution:
+      {
+        integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==,
+      }
+    engines: { node: ">=12" }
+
   dunder-proto@1.0.1:
     resolution:
       {
@@ -1242,6 +1255,12 @@ packages:
         integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==,
       }
     engines: { node: ">= 0.6" }
+
+  express-basic-auth@1.2.1:
+    resolution:
+      {
+        integrity: sha512-L6YQ1wQ/mNjVLAmK3AG1RK6VkokA1BIY6wmiH304Xtt/cLTps40EusZsU1Uop+v9lTDPxdtzbFmdXfFO3KEnwA==,
+      }
 
   express-ejs-layouts@2.5.1:
     resolution:
@@ -3069,6 +3088,8 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
+  dotenv@16.5.0: {}
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -3221,6 +3242,10 @@ snapshots:
   esutils@2.0.3: {}
 
   etag@1.8.1: {}
+
+  express-basic-auth@1.2.1:
+    dependencies:
+      basic-auth: 2.0.1
 
   express-ejs-layouts@2.5.1: {}
 
