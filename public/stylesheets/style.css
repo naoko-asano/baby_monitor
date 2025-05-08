@@ -1,23 +1,19 @@
-html,
 body {
-  height: 100%;
-  width: 100%;
   box-sizing: border-box;
-}
-
-body {
-  padding: 50px;
+  display: flex;
+  flex-direction: column;
   font:
     14px "Lucida Grande",
     Helvetica,
     Arial,
     sans-serif;
-  background-color: #242424;
+  background-color: #14161a;
   color: #fff;
 }
 
-a {
-  color: #00b7ff;
+.content .headline {
+  color: #fff;
+  padding-top: 50px;
 }
 
 .main {
