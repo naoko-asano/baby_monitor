@@ -8,6 +8,10 @@ import app from "../app";
 import debug from "debug";
 import http from "http";
 import { Server } from "socket.io";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 /**
  * Get port from environment and store in Express.
  */
@@ -91,7 +95,11 @@ function onListening() {
 /**
  * Socket.IO setup
  */
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+  },
+});
 
 io.on("connection", (socket) => {
   console.log("Websocket connected");

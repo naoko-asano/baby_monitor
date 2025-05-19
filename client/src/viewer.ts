@@ -1,9 +1,10 @@
-import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
-import { Spinner } from "https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.2/spin.min.js";
+import { io } from "socket.io-client";
+import { Spinner } from "spin.js";
 
 const temperatureElement = document.getElementById("temperature");
 const humidityElement = document.getElementById("humidity");
 async function fetchRoomConditions() {
+  if (!temperatureElement || !humidityElement) return;
   try {
     const response = await fetch("http://raspberrypi.local:5000", {
       method: "GET",
@@ -15,10 +16,12 @@ async function fetchRoomConditions() {
       throw new Error("Network response was not ok");
     }
     const { temperature, humidity } = await response.json();
+
     temperatureElement.textContent = temperature;
     humidityElement.textContent = humidity;
   } catch (error) {
     console.error("Error fetching room conditions:", error);
+
     temperatureElement.textContent = "N/A";
     humidityElement.textContent = "N/A";
   }
@@ -27,11 +30,14 @@ async function fetchRoomConditions() {
 fetchRoomConditions();
 setInterval(fetchRoomConditions, 1000 * 60);
 
-let peerConnection;
+let peerConnection: RTCPeerConnection | null = null;
 
-const videoElement = document.getElementById("video");
-const startButton = document.getElementById("startButton");
-const stopButton = document.getElementById("stopButton");
+const videoElement = document.getElementById("video") as HTMLVideoElement;
+const startButton = document.getElementById("startButton") as HTMLButtonElement;
+const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
+if (!videoElement || !startButton || !stopButton) {
+  throw new Error("Required elements not found in the DOM");
+}
 stopButton.disabled = true;
 
 const spinnerOptions = {
@@ -65,7 +71,7 @@ stopButton.addEventListener("click", () => {
   handleStopButtonClick();
 });
 
-const socket = io({
+const socket = io(import.meta.env.VITE_SERVER_URL, {
   autoConnect: false,
 });
 
@@ -77,7 +83,7 @@ socket.on("disconnect", () => {
   console.log("Disconnected from WebSocket server");
 });
 
-socket.on("connect_error", (error) => {
+socket.on("connect_error", (error: Error) => {
   console.log("Connection error: ", error);
 });
 
@@ -85,17 +91,22 @@ socket.on("signalingReady", () => {
   sendOffer();
 });
 
-socket.on("answer", (answer) => {
+socket.on("answer", (answer: RTCSessionDescription) => {
   handleReceiveAnswer(answer);
 });
 
-socket.on("iceCandidate", (iceCandidate) => {
+socket.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
   handleReceiveRemoteCandidate(iceCandidate);
 });
 
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
+
+  if (!videoWrapperElement) {
+    console.error("Video wrapper element not found");
+    return;
+  }
   startLoading(videoWrapperElement);
 
   initPeerConnection();
@@ -140,28 +151,28 @@ function initPeerConnection() {
 async function sendOffer() {
   ensurePeerConnectionInitialized();
 
-  peerConnection.addTransceiver("video", { direction: "recvonly" });
-  peerConnection.addTransceiver("audio", { direction: "recvonly" });
+  peerConnection?.addTransceiver("video", { direction: "recvonly" });
+  peerConnection?.addTransceiver("audio", { direction: "recvonly" });
 
-  const offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
+  const offer = await peerConnection?.createOffer();
+  await peerConnection?.setLocalDescription(offer);
   socket.emit("offer", offer);
   console.log("Sent offer: ", offer);
 }
 
-async function handleReceiveAnswer(answer) {
+async function handleReceiveAnswer(answer: RTCSessionDescription) {
   ensurePeerConnectionInitialized();
 
   console.log("Received answer: ", answer);
-  await peerConnection.setRemoteDescription(answer);
+  await peerConnection?.setRemoteDescription(answer);
 }
 
-async function handleReceiveRemoteCandidate(iceCandidate) {
+async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
   console.log("Received ICE candidate: ", iceCandidate);
-  await peerConnection.addIceCandidate(iceCandidate);
+  await peerConnection?.addIceCandidate(iceCandidate);
 }
 
-function sendIceCandidate(iceCandidate) {
+function sendIceCandidate(iceCandidate: RTCIceCandidate) {
   socket.emit("iceCandidate", iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
 }
@@ -181,7 +192,7 @@ function ensurePeerConnectionInitialized() {
   throw new Error("Peer connection is not initialized");
 }
 
-function startLoading(element) {
+function startLoading(element: HTMLElement) {
   spinner.spin(element);
 }
 
