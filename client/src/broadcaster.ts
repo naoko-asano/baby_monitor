@@ -1,9 +1,9 @@
-import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+import { io } from "socket.io-client";
 
-let peerConnection;
-let stream;
+let peerConnection: RTCPeerConnection | null = null;
+let stream: MediaStream | null = null;
 
-const socket = io();
+const socket = io(import.meta.env.VITE_SERVER_URL);
 
 socket.on("requestToStartSignaling", async () => {
   console.log("Viewer wants to start signaling");
@@ -11,11 +11,11 @@ socket.on("requestToStartSignaling", async () => {
   notifySignalingReady();
 });
 
-socket.on("offer", async (offer) => {
+socket.on("offer", async (offer: RTCSessionDescription) => {
   await handleReceiveOffer(offer);
 });
 
-socket.on("iceCandidate", async (iceCandidate) => {
+socket.on("iceCandidate", async (iceCandidate: RTCIceCandidate) => {
   await handleReceiveRemoteCandidate(iceCandidate);
 });
 
@@ -57,7 +57,8 @@ async function initPeerConnection() {
       audio: true,
     });
     stream.getTracks().forEach((track) => {
-      peerConnection.addTrack(track, stream);
+      if (!stream) return;
+      peerConnection?.addTrack(track, stream);
     });
   } catch (error) {
     console.error("Error accessing media devices.", error);
@@ -69,26 +70,26 @@ function notifySignalingReady() {
   console.log("Notified signaling ready");
 }
 
-async function handleReceiveOffer(offer) {
+async function handleReceiveOffer(offer: RTCSessionDescription) {
   ensurePeerConnectionInitialized();
 
   console.log("Received offer: ", offer);
-  await peerConnection.setRemoteDescription(offer);
+  await peerConnection?.setRemoteDescription(offer);
 
-  const answer = await peerConnection.createAnswer();
-  await peerConnection.setLocalDescription(answer);
+  const answer = await peerConnection?.createAnswer();
+  await peerConnection?.setLocalDescription(answer);
   socket.emit("answer", answer);
   console.log("Sent answer: ", answer);
 }
 
-async function handleReceiveRemoteCandidate(iceCandidate) {
+async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
   ensurePeerConnectionInitialized();
 
   console.log("Received ICE candidate: ", iceCandidate);
-  await peerConnection.addIceCandidate(iceCandidate);
+  await peerConnection?.addIceCandidate(iceCandidate);
 }
 
-function sendIceCandidate(iceCandidate) {
+function sendIceCandidate(iceCandidate: RTCIceCandidate) {
   socket.emit("iceCandidate", iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
 }
