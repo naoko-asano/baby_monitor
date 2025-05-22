@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default tseslint.config(
-  globalIgnores(["server/public"]),
+  globalIgnores(["dist"]),
   eslint.configs.recommended,
   tseslint.configs.recommended,
   {
