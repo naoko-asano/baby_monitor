@@ -26,7 +26,7 @@ User=your_username
 WorkingDirectory=/home/your_username/baby_monitor
 Environment=NODE_ENV=production
 Environment=PATH=/home/your_username/.nvm/versions/node/v22.14.0/bin:/usr/bin:/bin
-ExecStart=/home/your_username/.nvm/versions/node/v22.14.0/bin/pnpm start
+ExecStart=/home/your_username/baby_monitor/start.sh
 Restart=always
 RestartSec=5
 

@@ -7,7 +7,7 @@ export default defineConfig({
   root: path.join(path.resolve(), "client"),
   envDir: ".",
   build: {
-    outDir: path.join(path.resolve(), "server", "public"),
+    outDir: path.join(path.resolve(), "dist", "client"),
     emptyOutDir: true,
     rollupOptions: {
       input: {
