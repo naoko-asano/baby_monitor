@@ -6,6 +6,23 @@ WebRTCを使って、カメラで撮影した動画と音声を配信/視聴で�
 配信側は`/broadcaster`にアクセスしてください。  
 視聴側は`/`にアクセスしてください。
 
+## 起動方法
+
+### 開発環境
+
+```sh
+pnpm install
+pnpm dev
+```
+
+### 本番環境
+
+```sh
+pnpm install
+pnpm build
+pnpm start
+```
+
 ## systemd を用いた自動起動
 
 1. 以下のコマンドでサービスファイルを作成します。
