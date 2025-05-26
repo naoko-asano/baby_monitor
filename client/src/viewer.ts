@@ -3,6 +3,7 @@ import { Spinner } from "spin.js";
 
 const temperatureElement = document.getElementById("temperature");
 const humidityElement = document.getElementById("humidity");
+
 async function fetchRoomConditions() {
   if (!temperatureElement || !humidityElement) return;
   try {
@@ -33,8 +34,10 @@ setInterval(fetchRoomConditions, 1000 * 60);
 let peerConnection: RTCPeerConnection | null = null;
 
 const videoElement = document.getElementById("video") as HTMLVideoElement;
+const videoWrapperElement = document.getElementById("videoWrapper");
 const startButton = document.getElementById("startButton") as HTMLButtonElement;
 const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
+
 if (!videoElement || !startButton || !stopButton) {
   throw new Error("Required elements not found in the DOM");
 }
@@ -61,7 +64,7 @@ const spinnerOptions = {
   position: "absolute", // Element positioning
 };
 const spinner = new Spinner(spinnerOptions);
-const videoWrapperElement = document.getElementById("videoWrapper");
+let isLoading = false;
 
 startButton.addEventListener("click", () => {
   handleStartButtonClick();
@@ -114,9 +117,10 @@ function handleStartButtonClick() {
 }
 
 function handleStopButtonClick() {
+  if (isLoading) stopLoading();
+  stopWebRTC();
   startButton.disabled = false;
   stopButton.disabled = true;
-  stopWebRTC();
 }
 
 function requestToStartSignaling() {
@@ -194,8 +198,10 @@ function ensurePeerConnectionInitialized() {
 
 function startLoading(element: HTMLElement) {
   spinner.spin(element);
+  isLoading = true;
 }
 
 function stopLoading() {
   spinner.stop();
+  isLoading = false;
 }
