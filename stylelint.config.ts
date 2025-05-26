@@ -1,4 +1,4 @@
 export default {
   extends: "stylelint-config-standard",
-  ignoreFiles: ["server/public/**/*"],
+  ignoreFiles: ["node_modules/**/*"],
 };
