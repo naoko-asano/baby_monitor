@@ -3,6 +3,10 @@ import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import basicAuth from "express-basic-auth";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 type Error = {
   status?: number;
@@ -21,8 +25,13 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+  basicAuth({
+    users: { [process.env.BASIC_AUTH_USER!]: process.env.BASIC_AUTH_PASSWORD! },
+    challenge: true,
+  }),
+);
 app.use(express.static(path.join(__dirname, "dist", "client")));
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
