@@ -37,8 +37,15 @@ const videoElement = document.getElementById("video") as HTMLVideoElement;
 const videoWrapperElement = document.getElementById("videoWrapper");
 const startButton = document.getElementById("startButton") as HTMLButtonElement;
 const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
+const errorElement = document.getElementById("errorMessage");
 
-if (!videoElement || !startButton || !stopButton) {
+if (
+  !videoElement ||
+  !videoWrapperElement ||
+  !startButton ||
+  !stopButton ||
+  !errorElement
+) {
   throw new Error("Required elements not found in the DOM");
 }
 stopButton.disabled = true;
@@ -83,6 +90,12 @@ socket.on("connect", () => {
 });
 
 socket.on("disconnect", () => {
+  if (isLoading) stopLoading();
+  if (startButton.disabled) {
+    startButton.disabled = false;
+    stopButton.disabled = true;
+  }
+
   console.log("Disconnected from WebSocket server");
 });
 
@@ -102,15 +115,20 @@ socket.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
   handleReceiveRemoteCandidate(iceCandidate);
 });
 
+socket.on("abort", (errorMessage) => {
+  console.log("abort");
+  errorElement.textContent = errorMessage;
+});
+
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
 
-  if (!videoWrapperElement) {
-    console.error("Video wrapper element not found");
-    return;
+  if (errorElement?.textContent) {
+    errorElement.textContent = "";
   }
-  startLoading(videoWrapperElement);
+
+  startLoading(videoWrapperElement as HTMLElement);
 
   initPeerConnection();
   requestToStartSignaling();

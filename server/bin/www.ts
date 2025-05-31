@@ -7,7 +7,7 @@
 import app from "../app.js";
 import debug from "debug";
 import http from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -104,34 +104,63 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("Websocket connected");
 
-  socket.on("requestToStartSignaling", () => {
+  socket.on("registerAsBroadcaster", () => {
+    socket.join("broadcaster");
+    console.log("Registered as broadcaster");
+  });
+
+  socket.on("requestToStartSignaling", async () => {
+    socket.join("viewer");
+    if (await disconnectIfNoBroadcaster({ socket })) return;
+
     console.log("Received a request to start signaling");
-    socket.broadcast.emit("requestToStartSignaling");
+    socket.to("broadcaster").emit("requestToStartSignaling");
   });
 
-  socket.on("signalingReady", () => {
+  socket.on("signalingReady", async () => {
     console.log("A peer is ready to start signaling");
-    socket.broadcast.emit("signalingReady");
+    socket.to("viewer").emit("signalingReady");
   });
 
-  socket.on("offer", (offer) => {
+  socket.on("offer", async (offer) => {
+    if (await disconnectIfNoBroadcaster({ socket })) return;
+
     console.log("Offer received: ", offer);
-    socket.broadcast.emit("offer", offer);
+    socket.to("broadcaster").emit("offer", offer);
   });
 
-  socket.on("answer", (answer) => {
+  socket.on("answer", async (answer) => {
     console.log("Answer received: ", answer);
-    socket.broadcast.emit("answer", answer);
+    socket.to("viewer").emit("answer", answer);
   });
 
-  socket.on("iceCandidate", (iceCandidate) => {
+  socket.on("iceCandidate", async (iceCandidate) => {
+    if (await disconnectIfNoBroadcaster({ socket })) return;
+
     console.log("IceCandidate received: ", iceCandidate);
     socket.broadcast.emit("iceCandidate", iceCandidate);
   });
 
   socket.on("close", () => {
-    socket.broadcast.emit("close");
+    socket.to("broadcaster").emit("close");
     socket.disconnect();
     console.log("Websocket disconnected");
   });
+
+  socket.on("disconnect", () => {
+    console.log("Websocket disconnected");
+  });
 });
+
+async function disconnectIfNoBroadcaster({ socket }: { socket: Socket }) {
+  const isBroadcasterPresent =
+    (await io.in("broadcaster").fetchSockets()).length > 0;
+
+  if (isBroadcasterPresent) {
+    return false;
+  }
+
+  socket.emit("abort", "No broadcaster found. Please try again later.");
+  socket.disconnect();
+  return true;
+}
