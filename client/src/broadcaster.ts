@@ -4,6 +4,7 @@ let peerConnection: RTCPeerConnection | null = null;
 let stream: MediaStream | null = null;
 
 const socket = io(import.meta.env.VITE_SERVER_URL);
+socket.emit("registerAsBroadcaster");
 
 socket.on("requestToStartSignaling", async () => {
   console.log("Viewer wants to start signaling");
