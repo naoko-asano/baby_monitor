@@ -1,11 +1,14 @@
 import { defineConfig } from "vite";
 import path from "path";
 
-console.log("outDir", path.join(path.resolve(), "server", "public"));
-
 export default defineConfig({
   root: path.join(path.resolve(), "client"),
   envDir: ".",
+  resolve: {
+    alias: {
+      "@": path.join(path.resolve(), "client", "src"),
+    },
+  },
   build: {
     outDir: path.join(path.resolve(), "dist", "client"),
     emptyOutDir: true,
