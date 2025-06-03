@@ -96,7 +96,7 @@ function initializeButtons() {
   stopButton.disabled = true;
 }
 
-function ensurePeerConnectionInitialized(
+function assertPeerConnection(
   peerConnection: RTCPeerConnection | null,
 ): asserts peerConnection is RTCPeerConnection {
   if (peerConnection) return;
@@ -132,7 +132,7 @@ function initPeerConnection() {
 }
 
 async function sendOffer() {
-  ensurePeerConnectionInitialized(peerConnection);
+  assertPeerConnection(peerConnection);
 
   peerConnection.addTransceiver("video", { direction: "recvonly" });
   peerConnection.addTransceiver("audio", { direction: "recvonly" });
@@ -144,14 +144,14 @@ async function sendOffer() {
 }
 
 async function handleReceiveAnswer(answer: RTCSessionDescription) {
-  ensurePeerConnectionInitialized(peerConnection);
+  assertPeerConnection(peerConnection);
 
   console.log("Received answer: ", answer);
   await peerConnection?.setRemoteDescription(answer);
 }
 
 async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
-  ensurePeerConnectionInitialized(peerConnection);
+  assertPeerConnection(peerConnection);
 
   console.log("Received ICE candidate: ", iceCandidate);
   await peerConnection.addIceCandidate(iceCandidate);
@@ -163,7 +163,7 @@ function sendIceCandidate(iceCandidate: RTCIceCandidate) {
 }
 
 function stopWebRTC() {
-  ensurePeerConnectionInitialized(peerConnection);
+  assertPeerConnection(peerConnection);
 
   peerConnection.close();
   peerConnection = null;
