@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 import { startLoading, stopLoading, getIsLoading } from "@/loading";
 
+// Variables
 let peerConnection: RTCPeerConnection | null = null;
 
 const videoElement = document.getElementById("video") as HTMLVideoElement;
@@ -9,6 +10,11 @@ const startButton = document.getElementById("startButton") as HTMLButtonElement;
 const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
 const errorElement = document.getElementById("errorMessage");
 
+const socket = io(import.meta.env.VITE_SERVER_URL, {
+  autoConnect: false,
+});
+
+// Initialization
 if (
   !videoElement ||
   !videoWrapperElement ||
@@ -29,11 +35,7 @@ stopButton.addEventListener("click", () => {
   handleStopButtonClick();
 });
 
-// WebSocket
-const socket = io(import.meta.env.VITE_SERVER_URL, {
-  autoConnect: false,
-});
-
+// WebSocket event listeners
 socket.on("connect", () => {
   console.log("Connected to WebSocket server");
 });
