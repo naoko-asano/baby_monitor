@@ -41,7 +41,6 @@ socket.on("connect", () => {
 });
 
 socket.on("disconnect", () => {
-  if (getIsLoading()) stopLoading();
   if (startButton.disabled) {
     initializeButtons();
   }
@@ -66,8 +65,7 @@ socket.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
 });
 
 socket.on("abort", (errorMessage) => {
-  console.log("abort");
-  errorElement.textContent = errorMessage;
+  handleAbort(errorMessage);
 });
 
 // Functions
@@ -160,6 +158,12 @@ async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
 function sendIceCandidate(iceCandidate: RTCIceCandidate) {
   socket.emit("iceCandidate", iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
+}
+
+function handleAbort(errorMessage: string) {
+  stopLoading();
+  errorElement!.textContent = errorMessage;
+  console.log("Abort");
 }
 
 function stopWebRTC() {
