@@ -18,8 +18,9 @@ if (
 ) {
   throw new Error("Required elements not found in the DOM");
 }
-stopButton.disabled = true;
+initializeButtons();
 
+// Event listeners
 startButton.addEventListener("click", () => {
   handleStartButtonClick();
 });
@@ -28,6 +29,7 @@ stopButton.addEventListener("click", () => {
   handleStopButtonClick();
 });
 
+// WebSocket
 const socket = io(import.meta.env.VITE_SERVER_URL, {
   autoConnect: false,
 });
@@ -39,8 +41,7 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
   if (getIsLoading()) stopLoading();
   if (startButton.disabled) {
-    startButton.disabled = false;
-    stopButton.disabled = true;
+    initializeButtons();
   }
 
   console.log("Disconnected from WebSocket server");
@@ -67,6 +68,7 @@ socket.on("abort", (errorMessage) => {
   errorElement.textContent = errorMessage;
 });
 
+// Functions
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
@@ -84,8 +86,19 @@ function handleStartButtonClick() {
 function handleStopButtonClick() {
   if (getIsLoading()) stopLoading();
   stopWebRTC();
+  initializeButtons();
+}
+
+function initializeButtons() {
   startButton.disabled = false;
   stopButton.disabled = true;
+}
+
+function ensurePeerConnectionInitialized(
+  peerConnection: RTCPeerConnection | null,
+): asserts peerConnection is RTCPeerConnection {
+  if (peerConnection) return;
+  throw new Error("Peer connection is not initialized");
 }
 
 function requestToStartSignaling() {
@@ -111,34 +124,35 @@ function initPeerConnection() {
   };
 
   peerConnection.onicecandidate = (event) => {
-    if (event.candidate) {
-      sendIceCandidate(event.candidate);
-    }
+    if (!event.candidate) return;
+    sendIceCandidate(event.candidate);
   };
 }
 
 async function sendOffer() {
-  ensurePeerConnectionInitialized();
+  ensurePeerConnectionInitialized(peerConnection);
 
-  peerConnection?.addTransceiver("video", { direction: "recvonly" });
-  peerConnection?.addTransceiver("audio", { direction: "recvonly" });
+  peerConnection.addTransceiver("video", { direction: "recvonly" });
+  peerConnection.addTransceiver("audio", { direction: "recvonly" });
 
-  const offer = await peerConnection?.createOffer();
-  await peerConnection?.setLocalDescription(offer);
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
   socket.emit("offer", offer);
   console.log("Sent offer: ", offer);
 }
 
 async function handleReceiveAnswer(answer: RTCSessionDescription) {
-  ensurePeerConnectionInitialized();
+  ensurePeerConnectionInitialized(peerConnection);
 
   console.log("Received answer: ", answer);
   await peerConnection?.setRemoteDescription(answer);
 }
 
 async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
+  ensurePeerConnectionInitialized(peerConnection);
+
   console.log("Received ICE candidate: ", iceCandidate);
-  await peerConnection?.addIceCandidate(iceCandidate);
+  await peerConnection.addIceCandidate(iceCandidate);
 }
 
 function sendIceCandidate(iceCandidate: RTCIceCandidate) {
@@ -147,16 +161,11 @@ function sendIceCandidate(iceCandidate: RTCIceCandidate) {
 }
 
 function stopWebRTC() {
-  if (!peerConnection) return;
+  ensurePeerConnectionInitialized(peerConnection);
 
   peerConnection.close();
   peerConnection = null;
   videoElement.srcObject = null;
   socket.emit("close");
   console.log("Peer connection closed");
-}
-
-function ensurePeerConnectionInitialized() {
-  if (peerConnection) return;
-  throw new Error("Peer connection is not initialized");
 }
