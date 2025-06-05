@@ -37,7 +37,7 @@ stopButton.addEventListener("click", () => {
 
 // WebSocket event listeners
 socket.on("connect", () => {
-  console.log("Connected to WebSocket server");
+  console.log("Connected to WebSocket server. Socket.id:", socket.id);
 });
 
 socket.on("disconnect", () => {
