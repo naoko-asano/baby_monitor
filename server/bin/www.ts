@@ -7,8 +7,8 @@
 import app from "../app.js";
 import debug from "debug";
 import http from "http";
-import { Server, Socket } from "socket.io";
 import dotenv from "dotenv";
+import { setupSocketServer } from "../services/socket/index.js";
 
 dotenv.config();
 
@@ -95,72 +95,4 @@ function onListening() {
 /**
  * Socket.IO setup
  */
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL,
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("Websocket connected");
-
-  socket.on("registerAsBroadcaster", () => {
-    socket.join("broadcaster");
-    console.log("Registered as broadcaster");
-  });
-
-  socket.on("requestToStartSignaling", async () => {
-    socket.join("viewer");
-    if (await disconnectIfNoBroadcaster({ socket })) return;
-
-    console.log("Received a request to start signaling");
-    socket.to("broadcaster").emit("requestToStartSignaling");
-  });
-
-  socket.on("signalingReady", async () => {
-    console.log("A peer is ready to start signaling");
-    socket.to("viewer").emit("signalingReady");
-  });
-
-  socket.on("offer", async (offer) => {
-    if (await disconnectIfNoBroadcaster({ socket })) return;
-
-    console.log("Offer received: ", offer);
-    socket.to("broadcaster").emit("offer", offer);
-  });
-
-  socket.on("answer", async (answer) => {
-    console.log("Answer received: ", answer);
-    socket.to("viewer").emit("answer", answer);
-  });
-
-  socket.on("iceCandidate", async (iceCandidate) => {
-    if (await disconnectIfNoBroadcaster({ socket })) return;
-
-    console.log("IceCandidate received: ", iceCandidate);
-    socket.broadcast.emit("iceCandidate", iceCandidate);
-  });
-
-  socket.on("close", () => {
-    socket.to("broadcaster").emit("close");
-    socket.disconnect();
-    console.log("Websocket disconnected");
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Websocket disconnected");
-  });
-});
-
-async function disconnectIfNoBroadcaster({ socket }: { socket: Socket }) {
-  const isBroadcasterPresent =
-    (await io.in("broadcaster").fetchSockets()).length > 0;
-
-  if (isBroadcasterPresent) {
-    return false;
-  }
-
-  socket.emit("abort", "No broadcaster found. Please try again later.");
-  socket.disconnect();
-  return true;
-}
+setupSocketServer(server);
