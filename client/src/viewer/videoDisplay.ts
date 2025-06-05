@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { startLoading, stopLoading, getIsLoading } from "@/loading";
+import { startLoading, stopLoading, getIsLoading } from "@/viewer/loading";
 
 // Variables
 let peerConnection: RTCPeerConnection | null = null;
