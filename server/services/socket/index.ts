@@ -12,7 +12,8 @@ export function setupSocketServer(
   socketServer.on("connection", (socket: Socket) => {
     console.log("Websocket connected. socket id:", socket.id);
 
-    socket.on("registerAsBroadcaster", () => {
+    socket.on("registerAsBroadcaster", async () => {
+      if (await isBroadcasterPresent({ socketServer })) return;
       socket.join("broadcaster");
     });
 
@@ -51,6 +52,14 @@ export function setupSocketServer(
   });
 }
 
+async function isBroadcasterPresent({
+  socketServer,
+}: {
+  socketServer: Server;
+}) {
+  return (await socketServer.in("broadcaster").fetchSockets()).length > 0;
+}
+
 async function disconnectIfNoBroadcaster({
   socketServer,
   socket,
@@ -58,10 +67,7 @@ async function disconnectIfNoBroadcaster({
   socketServer: Server;
   socket: Socket;
 }) {
-  const isBroadcasterPresent =
-    (await socketServer.in("broadcaster").fetchSockets()).length > 0;
-
-  if (isBroadcasterPresent) return false;
+  if (await isBroadcasterPresent({ socketServer })) return false;
 
   socket.emit("abort", "No broadcaster found. Please try again later.");
   socket.disconnect();
