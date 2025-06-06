@@ -88,8 +88,14 @@ async function handleReceiveOffer(offer: RTCSessionDescription) {
 }
 
 async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
-  ensurePeerConnectionInitialized();
-
+  try {
+    ensurePeerConnectionInitialized();
+  } catch {
+    console.log(
+      "Peer connection is not initialized. Maybe Other Broadcaster already exists",
+    );
+    return;
+  }
   console.log("Received ICE candidate: ", iceCandidate);
   await peerConnection?.addIceCandidate(iceCandidate);
 }
