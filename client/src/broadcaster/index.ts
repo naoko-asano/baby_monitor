@@ -58,7 +58,12 @@ async function initPeerConnection() {
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment", width: 1920, height: 1080 },
+      video: {
+        facingMode: "environment",
+        width: 1920,
+        height: 1080,
+        frameRate: 15,
+      },
 
       audio: true,
     });
