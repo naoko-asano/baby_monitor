@@ -63,11 +63,7 @@ async function initPeerConnection() {
         width: 1920,
         height: 1080,
         frameRate: 15,
-        advanced: [
-          { exposureCompensation: 1.5 },
-          { torch: true },
-          { brightness: 1.5 },
-        ],
+        advanced: [{ exposureCompensation: 1.5 }, { brightness: 1.5 }],
       },
 
       audio: true,
