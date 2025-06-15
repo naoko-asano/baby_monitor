@@ -70,8 +70,16 @@ async function initPeerConnection() {
     });
     stream.getTracks().forEach((track) => {
       if (!stream) return;
-      const getCapabilities = track.getCapabilities();
-      console.log("Track", track.kind, "Capabilities: ", getCapabilities);
+      const capabilities = track.getCapabilities();
+      const settings = track.getSettings();
+      console.log(
+        "Track",
+        track.kind,
+        "Capabilities",
+        capabilities,
+        "Settings",
+        settings,
+      );
       peerConnection?.addTrack(track, stream);
     });
   } catch (error) {
