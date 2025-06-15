@@ -63,12 +63,19 @@ async function initPeerConnection() {
         width: 1920,
         height: 1080,
         frameRate: 15,
+        advanced: [
+          { exposureCompensation: 1.5 },
+          { torch: true },
+          { brightness: 1.5 },
+        ],
       },
 
       audio: true,
     });
     stream.getTracks().forEach((track) => {
       if (!stream) return;
+      const getCapabilities = track.getCapabilities();
+      console.log("Track", track.kind, "Capabilities: ", getCapabilities);
       peerConnection?.addTrack(track, stream);
     });
   } catch (error) {
