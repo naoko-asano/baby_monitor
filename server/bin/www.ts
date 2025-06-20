@@ -7,7 +7,9 @@
 import app from "../app.js";
 import debug from "debug";
 import http from "http";
+import https from "https";
 import dotenv from "dotenv";
+import fs from "fs";
 import { setupSocketServer } from "../services/socket/index.js";
 
 dotenv.config();
@@ -20,10 +22,20 @@ const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
 /**
- * Create HTTP server.
+ * Create HTTP(S) server.
  */
 
-const server = http.createServer(app);
+let server: http.Server | https.Server;
+if (process.env.NODE_ENV === "development") {
+  const options = {
+    key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.crt"),
+  };
+  server = https.createServer(options, app);
+} else {
+  // 本番ではcloudflare経由でHTTPSが提供されるため、HTTPサーバーを使用
+  server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.

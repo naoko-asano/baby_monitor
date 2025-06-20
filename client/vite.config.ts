@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import path from "path";
+import fs from "fs";
 
 export default defineConfig({
   root: path.join(path.resolve(), "client"),
@@ -7,6 +8,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.join(path.resolve(), "client", "src"),
+    },
+  },
+  server: {
+    host: true,
+    https: {
+      key: fs.readFileSync("server.key"),
+      cert: fs.readFileSync("server.crt"),
     },
   },
   build: {
