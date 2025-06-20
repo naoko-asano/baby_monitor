@@ -4,3 +4,7 @@ node_modules
 .env
 
 dist
+
+openssl.cnf
+server.key
+server.crt
