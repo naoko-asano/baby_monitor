@@ -35,7 +35,7 @@ WebRTCを使って、カメラで撮影した動画と音声を配信/視聴で�
      -config openssl.cnf
    ```
 
-4. .env.developmentの`VITE_SERVER_URL`をローカルIPアドレスに変更
+4. client/.env.developmentの`VITE_SERVER_URL`をローカルIPアドレスに変更
 
 ## 起動方法
 
