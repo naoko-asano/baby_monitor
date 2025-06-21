@@ -2,6 +2,17 @@ import { defineConfig } from "vite";
 import path from "path";
 import fs from "fs";
 
+const keyPath = path.resolve("server.key");
+const certPath = path.resolve("server.crt");
+
+const httpsOptions =
+  fs.existsSync(keyPath) && fs.existsSync(certPath)
+    ? {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      }
+    : undefined;
+
 export default defineConfig({
   root: path.join(path.resolve(), "client"),
   envDir: ".",
@@ -12,10 +23,7 @@ export default defineConfig({
   },
   server: {
     host: true,
-    https: {
-      key: fs.readFileSync("server.key"),
-      cert: fs.readFileSync("server.crt"),
-    },
+    https: httpsOptions,
   },
   build: {
     outDir: path.join(path.resolve(), "dist", "client"),
