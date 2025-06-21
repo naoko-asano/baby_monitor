@@ -6,9 +6,9 @@
 
 import app from "../app.js";
 import debug from "debug";
-import http from "http";
 import dotenv from "dotenv";
 import { setupSocketServer } from "../services/socket/index.js";
+import { createServer } from "../utils/createServer.js";
 
 dotenv.config();
 
@@ -20,11 +20,10 @@ const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
 /**
- * Create HTTP server.
+ * Create HTTP(S) server.
  */
 
-const server = http.createServer(app);
-
+const server = createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
