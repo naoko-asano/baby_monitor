@@ -14,13 +14,60 @@ body {
   color: #fff;
 }
 
+.container {
+  text-align: center;
+}
+
 .content .headline {
   color: #fff;
   padding-top: 50px;
+
+  @media screen and (width <= 1280px) {
+    padding-top: 20px;
+  }
 }
 
-.main {
+.content-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-conditions-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  @media screen and (width <= 1280px) {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.video-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#video {
+  width: 680px;
+  height: 480px;
+
+  @media screen and (width <= 1280px) {
+    width: 480px;
+    height: 320px;
+  }
+}
+
+.error-message {
+  color: #f00;
+  font-weight: bold;
   text-align: center;
+}
+
+.hidden {
+  display: none;
 }
 
 .controls {
@@ -28,16 +75,4 @@ body {
   justify-content: space-between;
   width: 300px;
   margin: 10px auto 0;
-}
-
-#video {
-  width: 680px;
-  height: 480px;
-}
-
-.error-message {
-  color: #f00;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
 }

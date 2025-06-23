@@ -72,10 +72,7 @@ socket.on("abort", (errorMessage) => {
 function handleStartButtonClick() {
   startButton.disabled = true;
   stopButton.disabled = false;
-
-  if (errorElement?.textContent) {
-    errorElement.textContent = "";
-  }
+  hideErrorMessage();
 
   startLoading(videoWrapperElement as HTMLElement);
 
@@ -162,7 +159,7 @@ function sendIceCandidate(iceCandidate: RTCIceCandidate) {
 
 function handleAbort(errorMessage: string) {
   stopLoading();
-  errorElement!.textContent = errorMessage;
+  displayErrorMessage(errorMessage);
   console.log("Abort");
 }
 
@@ -174,4 +171,16 @@ function stopWebRTC() {
   videoElement.srcObject = null;
   socket.emit("close");
   console.log("Peer connection closed");
+}
+
+function displayErrorMessage(message: string) {
+  errorElement!.classList.remove("hidden");
+  errorElement!.textContent = message;
+}
+
+function hideErrorMessage() {
+  if (!errorElement?.textContent) return;
+
+  errorElement!.classList.add("hidden");
+  errorElement!.textContent = "";
 }
