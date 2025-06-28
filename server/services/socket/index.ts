@@ -23,22 +23,23 @@ export function setupSocketServer(
       socket.to("broadcaster").emit("requestToStartSignaling");
     });
 
-    socket.on("signalingReady", async () => {
-      socket.to("viewer").emit("signalingReady");
-    });
-
     socket.on("offer", async (offer) => {
-      if (await disconnectIfNoBroadcaster({ socketServer, socket })) return;
-      socket.to("broadcaster").emit("offer", offer);
+      socket.to("viewer").emit("offer", offer);
     });
 
     socket.on("answer", async (answer) => {
-      socket.to("viewer").emit("answer", answer);
+      if (await disconnectIfNoBroadcaster({ socketServer, socket })) return;
+      socket.to("broadcaster").emit("answer", answer);
     });
 
     socket.on("iceCandidate", async (iceCandidate) => {
       if (await disconnectIfNoBroadcaster({ socketServer, socket })) return;
-      socket.broadcast.emit("iceCandidate", iceCandidate);
+
+      if (socket.rooms.has("viewer")) {
+        socket.to("broadcaster").emit("iceCandidate", iceCandidate);
+      } else if (socket.rooms.has("broadcaster")) {
+        socket.to("viewer").emit("iceCandidate", iceCandidate);
+      }
     });
 
     socket.on("close", () => {

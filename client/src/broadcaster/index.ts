@@ -1,4 +1,10 @@
 import { io } from "socket.io-client";
+import {
+  sendOffer,
+  handleReceiveAnswer,
+  sendIceCandidate,
+  handleReceiveRemoteCandidate,
+} from "@/shared/signaling";
 
 let peerConnection: RTCPeerConnection | null = null;
 let stream: MediaStream | null = null;
@@ -13,15 +19,18 @@ socket.on("connect", () => {
 socket.on("requestToStartSignaling", async () => {
   console.log("Viewer wants to start signaling");
   await initPeerConnection();
-  notifySignalingReady();
+  sendOffer({
+    peerConnection,
+    socket,
+  });
 });
 
-socket.on("offer", async (offer: RTCSessionDescription) => {
-  await handleReceiveOffer(offer);
+socket.on("answer", (answer: RTCSessionDescription) => {
+  handleReceiveAnswer({ peerConnection, answer });
 });
 
 socket.on("iceCandidate", async (iceCandidate: RTCIceCandidate) => {
-  await handleReceiveRemoteCandidate(iceCandidate);
+  await handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
 });
 
 socket.on("close", () => {
@@ -51,9 +60,8 @@ async function initPeerConnection() {
   });
 
   peerConnection.onicecandidate = (event) => {
-    if (event.candidate) {
-      sendIceCandidate(event.candidate);
-    }
+    if (!event.candidate) return;
+    sendIceCandidate({ iceCandidate: event.candidate, socket });
   };
 
   try {
@@ -68,44 +76,4 @@ async function initPeerConnection() {
   } catch (error) {
     console.error("Error accessing media devices.", error);
   }
-}
-
-function notifySignalingReady() {
-  socket.emit("signalingReady");
-  console.log("Notified signaling ready");
-}
-
-async function handleReceiveOffer(offer: RTCSessionDescription) {
-  ensurePeerConnectionInitialized();
-
-  console.log("Received offer: ", offer);
-  await peerConnection?.setRemoteDescription(offer);
-
-  const answer = await peerConnection?.createAnswer();
-  await peerConnection?.setLocalDescription(answer);
-  socket.emit("answer", answer);
-  console.log("Sent answer: ", answer);
-}
-
-async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
-  try {
-    ensurePeerConnectionInitialized();
-  } catch {
-    console.log(
-      "Peer connection is not initialized. Maybe Other Broadcaster already exists",
-    );
-    return;
-  }
-  console.log("Received ICE candidate: ", iceCandidate);
-  await peerConnection?.addIceCandidate(iceCandidate);
-}
-
-function sendIceCandidate(iceCandidate: RTCIceCandidate) {
-  socket.emit("iceCandidate", iceCandidate);
-  console.log("Sent ICE candidate: ", iceCandidate);
-}
-
-function ensurePeerConnectionInitialized() {
-  if (peerConnection) return;
-  throw new Error("Peer connection is not initialized");
 }

@@ -1,5 +1,11 @@
 import { io } from "socket.io-client";
 import { startLoading, stopLoading, getIsLoading } from "@/viewer/loading";
+import {
+  handleReceiveOffer,
+  handleReceiveRemoteCandidate,
+  sendIceCandidate,
+  assertPeerConnection,
+} from "@/shared/signaling";
 
 // Variables
 let peerConnection: RTCPeerConnection | null = null;
@@ -52,16 +58,12 @@ socket.on("connect_error", (error: Error) => {
   console.log("Connection error: ", error);
 });
 
-socket.on("signalingReady", () => {
-  sendOffer();
-});
-
-socket.on("answer", (answer: RTCSessionDescription) => {
-  handleReceiveAnswer(answer);
+socket.on("offer", async (offer: RTCSessionDescription) => {
+  await handleReceiveOffer({ peerConnection, offer, socket });
 });
 
 socket.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
-  handleReceiveRemoteCandidate(iceCandidate);
+  handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
 });
 
 socket.on("abort", (errorMessage) => {
@@ -91,19 +93,6 @@ function initializeButtons() {
   stopButton.disabled = true;
 }
 
-function assertPeerConnection(
-  peerConnection: RTCPeerConnection | null,
-): asserts peerConnection is RTCPeerConnection {
-  if (peerConnection) return;
-  throw new Error("Peer connection is not initialized");
-}
-
-function requestToStartSignaling() {
-  socket.connect();
-  socket.emit("requestToStartSignaling");
-  console.log("Requested to start signaling");
-}
-
 function initPeerConnection() {
   if (peerConnection) return;
 
@@ -122,39 +111,14 @@ function initPeerConnection() {
 
   peerConnection.onicecandidate = (event) => {
     if (!event.candidate) return;
-    sendIceCandidate(event.candidate);
+    sendIceCandidate({ iceCandidate: event.candidate, socket });
   };
 }
 
-async function sendOffer() {
-  assertPeerConnection(peerConnection);
-
-  peerConnection.addTransceiver("video", { direction: "recvonly" });
-  peerConnection.addTransceiver("audio", { direction: "recvonly" });
-
-  const offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
-  socket.emit("offer", offer);
-  console.log("Sent offer: ", offer);
-}
-
-async function handleReceiveAnswer(answer: RTCSessionDescription) {
-  assertPeerConnection(peerConnection);
-
-  console.log("Received answer: ", answer);
-  await peerConnection?.setRemoteDescription(answer);
-}
-
-async function handleReceiveRemoteCandidate(iceCandidate: RTCIceCandidate) {
-  assertPeerConnection(peerConnection);
-
-  console.log("Received ICE candidate: ", iceCandidate);
-  await peerConnection.addIceCandidate(iceCandidate);
-}
-
-function sendIceCandidate(iceCandidate: RTCIceCandidate) {
-  socket.emit("iceCandidate", iceCandidate);
-  console.log("Sent ICE candidate: ", iceCandidate);
+function requestToStartSignaling() {
+  socket.connect();
+  socket.emit("requestToStartSignaling");
+  console.log("Requested to start signaling");
 }
 
 function handleAbort(errorMessage: string) {
