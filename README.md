@@ -11,10 +11,11 @@ WebRTCを使って、カメラで撮影した動画と音声を配信/視聴で�
 1. .envファイルを作成
 
    ```
-   cp .env.sample .env
+   cp .env.example .env
+   cp client/.env.local.example client/.env.local
    ```
 
-2. .envファイルに適切な値を設定
+2. 上記のコピー先ファイルに適切な値を設定
 
 ### 開発環境で別のマシンから配信する場合
 
