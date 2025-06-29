@@ -18,9 +18,5 @@ jobs:
           cache: "pnpm"
       - name: Install Dependencies
         run: pnpm install
-      - name: Run Type Check
-        run: pnpm check-types
-      - name: Run Lint
-        run: pnpm lint
-      - name: Validate Format
-        run: pnpm format:check
+      - name: Run Code Quality Check
+        run: pnpm run-p check:*
