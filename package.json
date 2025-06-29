@@ -15,6 +15,7 @@
     "build:server": "rimraf ./dist/server && tsc -p ./server/tsconfig.json",
     "build": "pnpm build:client && pnpm build:server",
     "start": "node ./dist/server/bin/www.js",
+    "check-types": "tsc --noEmit && tsc --noEmit -p ./client/tsconfig.json && tsc --noEmit -p ./server/tsconfig.json",
     "lint": "eslint . && stylelint '**/*.scss'",
     "lint:fix": "eslint --fix . && stylelint --fix '**/*.scss'",
     "format:check": "prettier --check .",
