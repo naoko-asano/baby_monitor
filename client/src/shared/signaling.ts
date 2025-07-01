@@ -1,12 +1,8 @@
-import { Socket } from "socket.io-client";
-
-async function sendOffer({
-  peerConnection,
-  socket,
-}: {
+async function sendOffer(params: {
   peerConnection: RTCPeerConnection | null;
-  socket: Socket;
+  sendToServer: (offer: RTCSessionDescriptionInit) => void;
 }) {
+  const { peerConnection, sendToServer } = params;
   assertPeerConnection(peerConnection);
 
   peerConnection.addTransceiver("video", { direction: "recvonly" });
@@ -14,27 +10,24 @@ async function sendOffer({
 
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
-  socket.emit("offer", offer);
+  sendToServer(offer);
   console.log("Sent offer: ", offer);
 }
 
-async function handleReceiveOffer({
-  peerConnection,
-  offer,
-  socket,
-}: {
+async function handleReceiveOffer(params: {
   peerConnection: RTCPeerConnection | null;
   offer: RTCSessionDescriptionInit;
-  socket: Socket;
+  sendToServer: (offer: RTCSessionDescriptionInit) => void;
 }) {
+  const { peerConnection, offer, sendToServer } = params;
   assertPeerConnection(peerConnection);
 
   console.log("Received offer: ", offer);
   await peerConnection.setRemoteDescription(offer);
 
-  const answer = await peerConnection?.createAnswer();
+  const answer = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answer);
-  socket.emit("answer", answer);
+  sendToServer(answer);
   console.log("Sent answer: ", answer);
 }
 
@@ -53,12 +46,12 @@ async function handleReceiveAnswer({
 
 function sendIceCandidate({
   iceCandidate,
-  socket,
+  sendToServer,
 }: {
   iceCandidate: RTCIceCandidate;
-  socket: Socket;
+  sendToServer: (iceCandidate: RTCIceCandidate) => void;
 }) {
-  socket.emit("iceCandidate", iceCandidate);
+  sendToServer(iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
 }
 
