@@ -13,7 +13,10 @@ const signalingClient = createMessagingClient();
 signalingClient.emit("registerAsBroadcaster");
 
 signalingClient.on("connect", () => {
-  console.log("Connected to WebSocket server. Client.id:", signalingClient.id);
+  console.log(
+    "Connected to WebSocket server. SignalingClient.id:",
+    signalingClient.id,
+  );
 });
 
 signalingClient.on("requestToStartSignaling", async () => {
