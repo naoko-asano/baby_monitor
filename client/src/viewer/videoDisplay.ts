@@ -16,7 +16,7 @@ const startButton = document.getElementById("startButton") as HTMLButtonElement;
 const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
 const errorElement = document.getElementById("errorMessage");
 
-const signalingClient = createMessagingClient({
+const messagingClient = createMessagingClient({
   autoConnect: false,
 });
 
@@ -42,14 +42,14 @@ stopButton.addEventListener("click", () => {
 });
 
 // WebSocket event listeners
-signalingClient.on("connect", () => {
+messagingClient.on("connect", () => {
   console.log(
-    "Connected to WebSocket server. SignalingClient.id:",
-    signalingClient.id,
+    "Connected to WebSocket server. messagingClient.id:",
+    messagingClient.id,
   );
 });
 
-signalingClient.on("disconnect", () => {
+messagingClient.on("disconnect", () => {
   if (startButton.disabled) {
     initializeButtons();
   }
@@ -57,23 +57,23 @@ signalingClient.on("disconnect", () => {
   console.log("Disconnected from WebSocket server");
 });
 
-signalingClient.on("connect_error", (error: Error) => {
+messagingClient.on("connect_error", (error: Error) => {
   console.log("Connection error: ", error);
 });
 
-signalingClient.on("offer", async (offer: RTCSessionDescription) => {
+messagingClient.on("offer", async (offer: RTCSessionDescription) => {
   await handleReceiveOffer({
     peerConnection,
     offer,
-    sendToServer: (answer) => signalingClient.emit("answer", answer),
+    sendToServer: (answer) => messagingClient.emit("answer", answer),
   });
 });
 
-signalingClient.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
+messagingClient.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
   handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
 });
 
-signalingClient.on("abort", (errorMessage) => {
+messagingClient.on("abort", (errorMessage) => {
   handleAbort(errorMessage);
 });
 
@@ -121,14 +121,14 @@ function initPeerConnection() {
     sendIceCandidate({
       iceCandidate: event.candidate,
       sendToServer: (iceCandidate) =>
-        signalingClient.emit("iceCandidate", iceCandidate),
+        messagingClient.emit("iceCandidate", iceCandidate),
     });
   };
 }
 
 function requestToStartSignaling() {
-  signalingClient.connect();
-  signalingClient.emit("requestToStartSignaling");
+  messagingClient.connect();
+  messagingClient.emit("requestToStartSignaling");
   console.log("Requested to start signaling");
 }
 
@@ -144,7 +144,7 @@ function stopWebRTC() {
   peerConnection.close();
   peerConnection = null;
   videoElement.srcObject = null;
-  signalingClient.emit("close");
+  messagingClient.emit("close");
   console.log("Peer connection closed");
 }
 
