@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+import { createMessagingClient } from "@/shared/messagingClient";
 import {
   sendOffer,
   handleReceiveAnswer,
@@ -9,31 +9,34 @@ import {
 let peerConnection: RTCPeerConnection | null = null;
 let stream: MediaStream | null = null;
 
-const socket = io(import.meta.env.VITE_SERVER_URL);
-socket.emit("registerAsBroadcaster");
+const messagingClient = createMessagingClient();
+messagingClient.emit("registerAsBroadcaster");
 
-socket.on("connect", () => {
-  console.log("Connected to WebSocket server. Socket.id:", socket.id);
+messagingClient.on("connect", () => {
+  console.log(
+    "Connected to WebSocket server. messagingClient.id:",
+    messagingClient.id,
+  );
 });
 
-socket.on("requestToStartSignaling", async () => {
+messagingClient.on("requestToStartSignaling", async () => {
   console.log("Viewer wants to start signaling");
   await initPeerConnection();
   sendOffer({
     peerConnection,
-    socket,
+    sendToServer: (offer) => messagingClient.emit("offer", offer),
   });
 });
 
-socket.on("answer", (answer: RTCSessionDescription) => {
+messagingClient.on("answer", (answer: RTCSessionDescription) => {
   handleReceiveAnswer({ peerConnection, answer });
 });
 
-socket.on("iceCandidate", async (iceCandidate: RTCIceCandidate) => {
+messagingClient.on("iceCandidate", async (iceCandidate: RTCIceCandidate) => {
   await handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
 });
 
-socket.on("close", () => {
+messagingClient.on("close", () => {
   if (!peerConnection) return;
 
   peerConnection.close();
@@ -61,7 +64,11 @@ async function initPeerConnection() {
 
   peerConnection.onicecandidate = (event) => {
     if (!event.candidate) return;
-    sendIceCandidate({ iceCandidate: event.candidate, socket });
+    sendIceCandidate({
+      iceCandidate: event.candidate,
+      sendToServer: (iceCandidate) =>
+        messagingClient.emit("iceCandidate", iceCandidate),
+    });
   };
 
   try {
