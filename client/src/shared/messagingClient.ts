@@ -5,8 +5,10 @@ export interface MessagingClient {
   connected: boolean;
   connect(): void;
   disconnect(): void;
-  on(event: string, handler: (...args: any[]) => void): void; // eslint-disable-line @typescript-eslint/no-explicit-any
-  emit(event: string, payload?: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  on(event: string, handler: (...args: any[]) => void): void;
+  emit(event: string, payload?: any): void;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 export function createMessagingClient(options?: {
