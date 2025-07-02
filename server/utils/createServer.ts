@@ -1,7 +1,8 @@
-import path from "path";
 import fs from "fs";
 import http from "http";
 import https from "https";
+import path from "path";
+
 import type { Express } from "express";
 
 const keyPath = path.resolve("server.key");

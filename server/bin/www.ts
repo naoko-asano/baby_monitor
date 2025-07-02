@@ -4,9 +4,10 @@
  * Module dependencies.
  */
 
-import app from "../app.js";
 import debug from "debug";
 import dotenv from "dotenv";
+
+import app from "../app.js";
 import { setupSocketServer } from "../services/socket/index.js";
 import { createServer } from "../utils/createServer.js";
 

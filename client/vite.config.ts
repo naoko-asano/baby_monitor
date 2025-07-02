@@ -1,7 +1,8 @@
-import { defineConfig } from "vite";
-import path from "path";
 import fs from "fs";
 import https from "https";
+import path from "path";
+
+import { defineConfig } from "vite";
 
 const keyPath = path.resolve("server.key");
 const certPath = path.resolve("server.crt");
