@@ -31,37 +31,31 @@ async function handleReceiveOffer(params: {
   console.log("Sent answer: ", answer);
 }
 
-async function handleReceiveAnswer({
-  peerConnection,
-  answer,
-}: {
+async function handleReceiveAnswer(params: {
   peerConnection: RTCPeerConnection | null;
   answer: RTCSessionDescription;
 }) {
+  const { peerConnection, answer } = params;
   assertPeerConnection(peerConnection);
 
   console.log("Received answer: ", answer);
   await peerConnection.setRemoteDescription(answer);
 }
 
-function sendIceCandidate({
-  iceCandidate,
-  sendToServer,
-}: {
+function sendIceCandidate(params: {
   iceCandidate: RTCIceCandidate;
   sendToServer: (iceCandidate: RTCIceCandidate) => void;
 }) {
+  const { iceCandidate, sendToServer } = params;
   sendToServer(iceCandidate);
   console.log("Sent ICE candidate: ", iceCandidate);
 }
 
-async function handleReceiveRemoteCandidate({
-  peerConnection,
-  iceCandidate,
-}: {
+async function handleReceiveRemoteCandidate(params: {
   peerConnection: RTCPeerConnection | null;
   iceCandidate: RTCIceCandidate;
 }) {
+  const { peerConnection, iceCandidate } = params;
   assertPeerConnection(peerConnection);
 
   console.log("Received ICE candidate: ", iceCandidate);
