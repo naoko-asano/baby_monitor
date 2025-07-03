@@ -1,11 +1,11 @@
-import { startLoading, stopLoading, getIsLoading } from "@/viewer/loading";
+import { createMessagingClient } from "@/shared/messagingClient";
 import {
   handleReceiveOffer,
   handleReceiveRemoteCandidate,
   sendIceCandidate,
   assertPeerConnection,
 } from "@/shared/signaling";
-import { createMessagingClient } from "@/shared/messagingClient";
+import { startLoading, stopLoading, getIsLoading } from "@/viewer/loading";
 
 // Variables
 let peerConnection: RTCPeerConnection | null = null;
