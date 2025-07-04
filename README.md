@@ -58,4 +58,5 @@ pnpm start
 ## その他
 
 - [環境構成図](docs/architecture.md)
+- [映像・音声配信の詳細](docs/streaming.md)
 - [systemd を用いた自動起動設定手順](docs/autostart.md)
