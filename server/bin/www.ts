@@ -6,9 +6,14 @@
 
 import debug from "debug";
 import dotenv from "dotenv";
+import { Server as SocketIoServer } from "socket.io";
 
 import app from "../app.js";
-import { setupSocketServer } from "../services/socket/index.js";
+import { setupSignalingServer } from "../services/signaling/setup.js";
+import {
+  convertToSignalingServer,
+  convertToConnection,
+} from "../services/signaling/socketIoAdapter.js";
 import { createServer } from "../utils/createServer.js";
 
 dotenv.config();
@@ -93,6 +98,15 @@ function onListening() {
 }
 
 /**
- * Socket.IO setup
+ * Signaling Server setup
  */
-setupSocketServer(server);
+const socketIoServer = new SocketIoServer(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+  },
+});
+setupSignalingServer({
+  transportServer: socketIoServer,
+  convertToSignalingServer,
+  convertToConnection,
+});
