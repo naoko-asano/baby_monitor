@@ -8,13 +8,13 @@ import debug from "debug";
 import dotenv from "dotenv";
 import { Server as SocketIoServer } from "socket.io";
 
-import app from "../app.js";
-import { setupSignalingServer } from "../services/signaling/setup.js";
+import app from "@/app.js";
 import {
-  convertToSignalingServer,
+  setupSignalingServer,
   convertToConnection,
-} from "../services/signaling/socketIoAdapter.js";
-import { createServer } from "../utils/createServer.js";
+  convertToSignalingServer,
+} from "@/services/signaling/index.js";
+import { createServer } from "@/utils/createServer.js";
 
 dotenv.config();
 

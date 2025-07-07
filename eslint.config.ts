@@ -44,5 +44,13 @@ export default tseslint.config(
       },
     },
   },
+  {
+    files: ["server/**/*.ts"],
+    settings: {
+      "import/resolver": {
+        typescript: { project: "./server/tsconfig.json" },
+      },
+    },
+  },
   eslintConfigPrettier,
 );
