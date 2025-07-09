@@ -21,8 +21,12 @@ export function createMessagingClient(options?: {
     autoConnect: options?.autoConnect ?? defaultOptions.autoConnect,
   });
   return {
-    id: client.id,
-    connected: client.connected,
+    get id() {
+      return client.id;
+    },
+    get connected() {
+      return client.connected;
+    },
     connect: client.connect.bind(client),
     disconnect: client.disconnect.bind(client),
     on: client.on.bind(client),

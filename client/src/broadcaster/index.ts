@@ -4,12 +4,14 @@ import {
   handleReceiveAnswer,
   sendIceCandidate,
   handleReceiveRemoteCandidate,
+  assertPeerConnection,
 } from "@/shared/signaling";
 
-let peerConnection: RTCPeerConnection | null = null;
+const peerConnections = new Map<string, RTCPeerConnection | null>();
 let stream: MediaStream | null = null;
 
 const messagingClient = createMessagingClient();
+
 messagingClient.emit("registerAsBroadcaster");
 
 messagingClient.on("connect", () => {
@@ -19,30 +21,47 @@ messagingClient.on("connect", () => {
   );
 });
 
-messagingClient.on("requestToStartSignaling", async () => {
-  console.log("Viewer wants to start signaling");
-  await initPeerConnection();
-  sendOffer({
-    peerConnection,
-    sendToServer: (offer) => messagingClient.emit("offer", offer),
-  });
-});
+messagingClient.on(
+  "requestToStartSignaling",
+  async (params: { viewerId: string }) => {
+    const { viewerId } = params;
+    console.log(`Viewer ${viewerId} wants to start signaling`);
+    const peerConnection = await initPeerConnection(viewerId);
 
-messagingClient.on("answer", (answer: RTCSessionDescription) => {
-  handleReceiveAnswer({ peerConnection, answer });
-});
+    sendOffer({
+      peerConnection,
+      sendToServer: (offer) =>
+        messagingClient.emit("offer", { viewerId, offer }),
+    });
+  },
+);
 
-messagingClient.on("iceCandidate", async (iceCandidate: RTCIceCandidate) => {
-  await handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
-});
+messagingClient.on(
+  "answer",
+  (params: { viewerId: string; answer: RTCSessionDescriptionInit }) => {
+    const { viewerId, answer } = params;
+    const peerConnection = findPeerConnection(viewerId);
+    handleReceiveAnswer({ peerConnection, answer });
+  },
+);
 
-messagingClient.on("close", () => {
-  if (!peerConnection) return;
+messagingClient.on(
+  "iceCandidate",
+  async (params: { viewerId: string; iceCandidate: RTCIceCandidate }) => {
+    const { viewerId, iceCandidate } = params;
+    const peerConnection = findPeerConnection(viewerId);
+    await handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
+  },
+);
+
+messagingClient.on("close", (params: { viewerId: string }) => {
+  const { viewerId } = params;
+  const peerConnection = findPeerConnection(viewerId);
 
   peerConnection.close();
-  peerConnection = null;
+  peerConnections.delete(viewerId);
 
-  if (!stream) return;
+  if (!stream || peerConnections.size > 0) return;
   stream.getTracks().forEach((track) => {
     track.stop();
   });
@@ -51,10 +70,8 @@ messagingClient.on("close", () => {
   console.log("Peer connection closed");
 });
 
-async function initPeerConnection() {
-  if (peerConnection) return;
-
-  peerConnection = new RTCPeerConnection({
+async function initPeerConnection(viewerId: string) {
+  const peerConnection = new RTCPeerConnection({
     iceServers: [
       {
         urls: "stun:stun.l.google.com:19302",
@@ -78,9 +95,18 @@ async function initPeerConnection() {
     });
     stream.getTracks().forEach((track) => {
       if (!stream) return;
-      peerConnection?.addTrack(track, stream);
+      peerConnection.addTrack(track.clone(), stream);
     });
   } catch (error) {
     console.error("Error accessing media devices.", error);
   }
+
+  peerConnections.set(viewerId, peerConnection);
+  return peerConnection;
+}
+
+export function findPeerConnection(viewerId: string): RTCPeerConnection {
+  const peerConnection = peerConnections.get(viewerId);
+  assertPeerConnection(peerConnection);
+  return peerConnection;
 }

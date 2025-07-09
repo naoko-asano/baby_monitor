@@ -20,3 +20,8 @@ export async function disconnectIfNoBroadcaster(params: {
   connection.disconnect();
   return true;
 }
+
+export function isFromBroadcaster(params: { connection: Connection }): boolean {
+  const { connection } = params;
+  return connection.rooms.has("broadcaster");
+}

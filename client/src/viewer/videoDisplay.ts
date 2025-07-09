@@ -43,10 +43,7 @@ stopButton.addEventListener("click", () => {
 
 // WebSocket event listeners
 messagingClient.on("connect", () => {
-  console.log(
-    "Connected to WebSocket server. messagingClient.id:",
-    messagingClient.id,
-  );
+  requestToStartSignaling();
 });
 
 messagingClient.on("disconnect", () => {
@@ -61,13 +58,21 @@ messagingClient.on("connect_error", (error: Error) => {
   console.log("Connection error: ", error);
 });
 
-messagingClient.on("offer", async (offer: RTCSessionDescription) => {
-  await handleReceiveOffer({
-    peerConnection,
-    offer,
-    sendToServer: (answer) => messagingClient.emit("answer", answer),
-  });
-});
+messagingClient.on(
+  "offer",
+  async (params: { offer: RTCSessionDescription }) => {
+    const { offer } = params;
+    await handleReceiveOffer({
+      peerConnection,
+      offer,
+      sendToServer: (answer) =>
+        messagingClient.emit("answer", {
+          viewerId: viewerId(),
+          answer,
+        }),
+    });
+  },
+);
 
 messagingClient.on("iceCandidate", (iceCandidate: RTCIceCandidate) => {
   handleReceiveRemoteCandidate({ peerConnection, iceCandidate });
@@ -86,7 +91,7 @@ function handleStartButtonClick() {
   startLoading(videoWrapperElement as HTMLElement);
 
   initPeerConnection();
-  requestToStartSignaling();
+  messagingClient.connect();
 }
 
 function handleStopButtonClick() {
@@ -98,6 +103,10 @@ function handleStopButtonClick() {
 function initializeButtons() {
   startButton.disabled = false;
   stopButton.disabled = true;
+}
+
+function viewerId() {
+  return messagingClient.id || "";
 }
 
 function initPeerConnection() {
@@ -121,15 +130,19 @@ function initPeerConnection() {
     sendIceCandidate({
       iceCandidate: event.candidate,
       sendToServer: (iceCandidate) =>
-        messagingClient.emit("iceCandidate", iceCandidate),
+        messagingClient.emit("iceCandidate", {
+          viewerId: viewerId(),
+          iceCandidate,
+        }),
     });
   };
 }
 
 function requestToStartSignaling() {
-  messagingClient.connect();
-  messagingClient.emit("requestToStartSignaling");
-  console.log("Requested to start signaling");
+  messagingClient.emit("requestToStartSignaling", {
+    viewerId: viewerId(),
+  });
+  console.log("Requested to start signaling. Viewer ID:", viewerId());
 }
 
 function handleAbort(errorMessage: string) {
@@ -144,7 +157,7 @@ function stopWebRTC() {
   peerConnection.close();
   peerConnection = null;
   videoElement.srcObject = null;
-  messagingClient.emit("close");
+  messagingClient.emit("close", { viewerId: viewerId() });
   console.log("Peer connection closed");
 }
 

@@ -4,7 +4,11 @@ import {
   TransportServer,
   TransportConnection,
 } from "./types.js";
-import { isBroadcasterPresent, disconnectIfNoBroadcaster } from "./utils.js";
+import {
+  isBroadcasterPresent,
+  disconnectIfNoBroadcaster,
+  isFromBroadcaster,
+} from "./utils.js";
 
 export function setupSignalingServer(params: {
   transportServer: TransportServer;
@@ -34,36 +38,37 @@ function handleConnection(
     connection.join("broadcaster");
   });
 
-  connection.on("requestToStartSignaling", async () => {
+  connection.on("requestToStartSignaling", async ({ viewerId }) => {
     if (await disconnectIfNoBroadcaster({ signalingServer, connection }))
       return;
-    connection.join("viewer");
-    connection.to("broadcaster").emit("requestToStartSignaling");
+    connection.to("broadcaster").emit("requestToStartSignaling", { viewerId });
   });
 
-  connection.on("offer", async (offer) => {
-    connection.to("viewer").emit("offer", offer);
+  connection.on("offer", async ({ viewerId, offer }) => {
+    connection.to(viewerId).emit("offer", { offer });
   });
 
-  connection.on("answer", async (answer) => {
+  connection.on("answer", async ({ viewerId, answer }) => {
     if (await disconnectIfNoBroadcaster({ signalingServer, connection }))
       return;
-    connection.to("broadcaster").emit("answer", answer);
+    connection.to("broadcaster").emit("answer", { viewerId, answer });
   });
 
-  connection.on("iceCandidate", async (iceCandidate) => {
+  connection.on("iceCandidate", async ({ viewerId, iceCandidate }) => {
     if (await disconnectIfNoBroadcaster({ signalingServer, connection }))
       return;
 
-    if (connection.rooms.has("viewer")) {
-      connection.to("broadcaster").emit("iceCandidate", iceCandidate);
-    } else if (connection.rooms.has("broadcaster")) {
-      connection.to("viewer").emit("iceCandidate", iceCandidate);
+    if (isFromBroadcaster({ connection })) {
+      connection.to(viewerId).emit("iceCandidate", { iceCandidate });
+    } else {
+      connection
+        .to("broadcaster")
+        .emit("iceCandidate", { viewerId, iceCandidate });
     }
   });
 
-  connection.on("close", () => {
-    connection.to("broadcaster").emit("close");
+  connection.on("close", ({ viewerId }) => {
+    connection.to("broadcaster").emit("close", { viewerId });
     connection.disconnect();
   });
 
