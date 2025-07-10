@@ -96,7 +96,7 @@ function handleStartButtonClick() {
 
 function handleStopButtonClick() {
   if (getIsLoading()) stopLoading();
-  stopWebRTC();
+  stopViewing();
   initializeButtons();
 }
 
@@ -151,7 +151,7 @@ function handleAbort(errorMessage: string) {
   console.log("Abort");
 }
 
-function stopWebRTC() {
+function stopViewing() {
   assertPeerConnection(peerConnection);
 
   peerConnection.close();
