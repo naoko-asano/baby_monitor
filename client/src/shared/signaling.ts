@@ -33,11 +33,10 @@ async function handleReceiveOffer(params: {
 
 async function handleReceiveAnswer(params: {
   peerConnection: RTCPeerConnection | null;
-  answer: RTCSessionDescription;
+  answer: RTCSessionDescriptionInit;
 }) {
   const { peerConnection, answer } = params;
   assertPeerConnection(peerConnection);
-
   console.log("Received answer: ", answer);
   await peerConnection.setRemoteDescription(answer);
 }
@@ -63,7 +62,7 @@ async function handleReceiveRemoteCandidate(params: {
 }
 
 function assertPeerConnection(
-  peerConnection: RTCPeerConnection | null,
+  peerConnection?: RTCPeerConnection | null,
 ): asserts peerConnection is RTCPeerConnection {
   if (peerConnection) return;
   throw new Error("Peer connection is not initialized");
