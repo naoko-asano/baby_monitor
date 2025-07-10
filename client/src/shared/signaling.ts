@@ -62,7 +62,7 @@ async function handleReceiveRemoteCandidate(params: {
 }
 
 function assertPeerConnection(
-  peerConnection: RTCPeerConnection | null | undefined,
+  peerConnection?: RTCPeerConnection | null,
 ): asserts peerConnection is RTCPeerConnection {
   if (peerConnection) return;
   throw new Error("Peer connection is not initialized");
