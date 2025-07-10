@@ -67,7 +67,7 @@ messagingClient.on("close", (params: { viewerId: string }) => {
   });
   stream = null;
 
-  console.log("Peer connection closed");
+  console.log("Stop broadcasting");
 });
 
 async function initPeerConnection(viewerId: string) {
