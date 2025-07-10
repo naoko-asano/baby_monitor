@@ -89,10 +89,12 @@ async function initPeerConnection(viewerId: string) {
   };
 
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-      audio: true,
-    });
+    if (!stream) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: true,
+      });
+    }
     stream.getTracks().forEach((track) => {
       if (!stream) return;
       peerConnection.addTrack(track.clone(), stream);
