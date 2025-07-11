@@ -5,6 +5,11 @@ import {
   isFromBroadcaster,
 } from "./utils.js";
 
+import {
+  incrementViewers,
+  decrementViewers,
+} from "@/services/viewerCounter/index.js";
+
 export function handleConnection(
   connection: Connection,
   signalingServer: SignalingServer,
@@ -17,6 +22,7 @@ export function handleConnection(
   connection.on("requestToStartSignaling", async ({ viewerId }) => {
     if (await disconnectIfNoBroadcaster({ signalingServer, connection }))
       return;
+    incrementViewers();
     connection.to("broadcaster").emit("requestToStartSignaling", { viewerId });
   });
 
@@ -45,6 +51,7 @@ export function handleConnection(
 
   connection.on("close", ({ viewerId }) => {
     connection.to("broadcaster").emit("close", { viewerId });
+    decrementViewers();
     connection.disconnect();
   });
 
