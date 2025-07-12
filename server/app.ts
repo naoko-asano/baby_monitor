@@ -1,11 +1,14 @@
 import path from "path";
 
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
 import basicAuth from "express-basic-auth";
 import createError from "http-errors";
 import logger from "morgan";
+
+import { countViewers } from "@/services/viewerCounter/index.js";
 
 dotenv.config();
 
@@ -26,6 +29,16 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+  }),
+);
+app.get("/viewers-count", (_req, res) => {
+  res.json({ viewersCount: countViewers() });
+});
+
 app.use(
   basicAuth({
     users: { [process.env.BASIC_AUTH_USER!]: process.env.BASIC_AUTH_PASSWORD! },
