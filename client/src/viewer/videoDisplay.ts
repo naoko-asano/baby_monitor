@@ -11,7 +11,7 @@ import { startLoading, stopLoading, getIsLoading } from "@/viewer/loading";
 let peerConnection: RTCPeerConnection | null = null;
 
 const videoElement = document.getElementById("video") as HTMLVideoElement;
-const videoWrapperElement = document.getElementById("videoWrapper");
+const videoWrapperElement = document.getElementById("video-wrapper");
 const startButton = document.getElementById("startButton") as HTMLButtonElement;
 const stopButton = document.getElementById("stopButton") as HTMLButtonElement;
 const errorElement = document.getElementById("errorMessage");
