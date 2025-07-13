@@ -4,10 +4,14 @@ import {
   handleReceiveAnswer,
   sendIceCandidate,
   handleReceiveRemoteCandidate,
-  assertPeerConnection,
 } from "@/shared/signaling";
 
-const peerConnections = new Map<string, RTCPeerConnection | null>();
+interface Viewers {
+  peerConnection: RTCPeerConnection;
+  tracks: MediaStreamTrack[];
+}
+
+const viewers = new Map<string, Viewers>();
 let stream: MediaStream | null = null;
 
 const messagingClient = createMessagingClient();
@@ -56,12 +60,16 @@ messagingClient.on(
 
 messagingClient.on("close", (params: { viewerId: string }) => {
   const { viewerId } = params;
+  const viewer = viewers.get(viewerId);
   const peerConnection = findPeerConnection(viewerId);
-
   peerConnection.close();
-  peerConnections.delete(viewerId);
 
-  if (!stream || peerConnections.size > 0) return;
+  viewer?.tracks.forEach((track) => {
+    track.stop();
+  });
+  viewers.delete(viewerId);
+
+  if (!stream || viewers.size > 0) return;
   stream.getTracks().forEach((track) => {
     track.stop();
   });
@@ -95,20 +103,34 @@ async function initPeerConnection(viewerId: string) {
         audio: true,
       });
     }
-    stream.getTracks().forEach((track) => {
-      if (!stream) return;
-      peerConnection.addTrack(track.clone(), stream);
+    const tracks = stream.getTracks().map((originalTrack) => {
+      const track = originalTrack.clone();
+      assertStream(stream);
+      peerConnection.addTrack(track, stream);
+      return track;
+    });
+
+    viewers.set(viewerId, {
+      peerConnection,
+      tracks,
     });
   } catch (error) {
     console.error("Error accessing media devices.", error);
   }
-
-  peerConnections.set(viewerId, peerConnection);
   return peerConnection;
 }
 
 export function findPeerConnection(viewerId: string): RTCPeerConnection {
-  const peerConnection = peerConnections.get(viewerId);
-  assertPeerConnection(peerConnection);
-  return peerConnection;
+  const viewer = viewers.get(viewerId);
+  if (!viewer) {
+    throw new Error(`No peer connection found for viewer ID: ${viewerId}`);
+  }
+  return viewer.peerConnection;
+}
+
+function assertStream(
+  stream: MediaStream | null,
+): asserts stream is MediaStream {
+  if (stream) return;
+  throw new Error("Stream is not initialized");
 }
